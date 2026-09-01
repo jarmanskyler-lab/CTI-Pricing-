@@ -23,25 +23,25 @@
   body {
     margin:0; background:var(--stone-100); color:var(--stone-800);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-    padding: 16px; padding-bottom: 48px;
+    padding: 12px; padding-bottom: 40px;
     -webkit-user-select:none; user-select:none;
   }
   input, select { -webkit-user-select:text; user-select:text; }
   .wrap { max-width: 720px; margin: 0 auto; }
-  .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; gap:10px; flex-wrap:wrap; }
+  .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:10px; flex-wrap:wrap; }
   .brand { display:flex; align-items:center; gap:8px; }
   .brand .icon { width:32px; height:32px; border-radius:6px; background:var(--emerald-700); color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; }
   .brand h1 { font-size:15px; font-weight:600; margin:0; color:var(--stone-800); }
   .brand p { font-size:11px; color:var(--stone-400); margin:0; }
   .tabs { display:flex; border:1px solid var(--stone-300); border-radius:6px; overflow:hidden; font-size:12px; }
-  .tabs button { border:none; background:#fff; color:var(--stone-500); padding:7px 12px; font-weight:500; }
+  .tabs button { border:none; background:#fff; color:var(--stone-500); padding:10px 14px; font-weight:500; min-height:40px; }
   .tabs button.active { background:var(--stone-800); color:#fff; }
-  .card { background:#fff; border:1px solid var(--stone-200); border-radius:10px; box-shadow:0 1px 2px rgba(0,0,0,.04); margin-top:16px; overflow:hidden; }
-  .card-head { border-bottom:1px solid var(--stone-200); padding:12px 16px; }
+  .card { background:#fff; border:1px solid var(--stone-200); border-radius:10px; box-shadow:0 1px 2px rgba(0,0,0,.04); margin-top:12px; overflow:hidden; }
+  .card-head { border-bottom:1px solid var(--stone-200); padding:10px 14px; }
   .card-head h2 { font-size:13px; font-weight:600; margin:0; color:var(--stone-800); }
   .card-head p { font-size:11px; color:var(--stone-400); margin:4px 0 0; }
-  .card-body { padding: 12px 16px; }
-  .row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 0; }
+  .card-body { padding: 10px 14px; }
+  .row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:6px 0; min-height:40px; }
   .row-border { border-bottom:1px solid var(--stone-100); }
   .row:last-child { border-bottom:none; }
   .field-label { font-size:13px; font-weight:500; color:var(--stone-700); }
@@ -49,30 +49,32 @@
   .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:0 20px; }
   input.num {
     width:90px; text-align:right; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-    font-size:13px; padding:6px 8px; border:1px solid var(--stone-300); border-radius:6px; color:var(--stone-800); background:#fff;
+    font-size:14px; padding:10px 8px; border:1px solid var(--stone-300); border-radius:8px; color:var(--stone-800); background:#fff;
+    min-height:40px;
   }
   input.num:focus { outline:none; border-color:var(--emerald-600); box-shadow:0 0 0 1px var(--emerald-600); }
   select.pct {
     width:70px; text-align:right; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-    font-size:13px; padding:6px 8px; border:1px solid var(--stone-300); border-radius:6px; color:var(--stone-800); background:#fff;
+    font-size:14px; padding:10px 8px; border:1px solid var(--stone-300); border-radius:8px; color:var(--stone-800); background:#fff;
+    min-height:40px;
   }
-  .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:9px 0; }
+  .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:6px 0; min-height:44px; }
   .toggle-row .field-label { font-size:13px; font-weight:500; color:var(--stone-700); }
   .toggle-row .field-hint { font-size:11px; color:var(--stone-400); }
-  .switch { position:relative; width:40px; height:24px; border-radius:999px; background:var(--stone-300); border:none; padding:0; cursor:pointer; flex-shrink:0; transition:background .15s; }
+  .switch { position:relative; width:48px; height:29px; border-radius:999px; background:var(--stone-300); border:none; padding:0; cursor:pointer; flex-shrink:0; transition:background .15s; }
   .switch.on { background:var(--emerald-600); }
-  .switch .knob { position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.2); transition:transform .15s; }
-  .switch.on .knob { transform:translateX(16px); }
+  .switch .knob { position:absolute; top:2.5px; left:2.5px; width:24px; height:24px; border-radius:50%; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.2); transition:transform .15s; }
+  .switch.on .knob { transform:translateX(19px); }
 
   .formula {
     border:1px dashed var(--stone-300); background:var(--stone-50); border-radius:6px;
-    padding:10px 12px; font-size:12px; line-height:1.5; color:var(--stone-500); margin-top:14px;
+    padding:10px 12px; font-size:12px; line-height:1.5; color:var(--stone-500); margin-top:12px;
   }
   .formula b { color:var(--stone-700); }
   .formula .tag { color:var(--stone-400); }
   .note { font-size:11px; color:var(--stone-400); margin-top:8px; }
   .divide > div + div { border-top:1px solid var(--stone-100); }
-  .market-row { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; gap:8px; }
+  .market-row { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; gap:8px; min-height:44px; }
   .market-name { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:500; color:var(--stone-700); }
   .market-emoji { font-size:14px; }
   .mono { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
@@ -179,8 +181,8 @@
               <div class="field-hint">Single Bale: no press, fixed container weight</div>
             </div>
             <div style="display:flex; border:1px solid var(--stone-300); border-radius:6px; overflow:hidden; font-size:12px;">
-              <button id="packingPressed" type="button" style="padding:6px 12px; border:none; background:var(--stone-800); color:#fff; font-weight:600;">Pressed</button>
-              <button id="packingSingleBale" type="button" style="padding:6px 12px; border:none; background:#fff; color:var(--stone-500); font-weight:600;">Single Bale</button>
+              <button id="packingPressed" type="button" style="padding:10px 14px; min-height:40px; border:none; background:var(--stone-800); color:#fff; font-weight:600;">Pressed</button>
+              <button id="packingSingleBale" type="button" style="padding:10px 14px; min-height:40px; border:none; background:#fff; color:var(--stone-500); font-weight:600;">Single Bale</button>
             </div>
           </div>
         </div>
@@ -332,8 +334,8 @@
         <div class="row">
           <div class="field-label">Direction</div>
           <div style="display:flex; border:1px solid var(--stone-300); border-radius:6px; overflow:hidden; font-size:12px;">
-            <button id="freightAdjInc" type="button" style="padding:6px 12px; border:none; background:var(--stone-800); color:#fff; font-weight:600;">Increase</button>
-            <button id="freightAdjDec" type="button" style="padding:6px 12px; border:none; background:#fff; color:var(--stone-500); font-weight:600;">Decrease</button>
+            <button id="freightAdjInc" type="button" style="padding:10px 14px; min-height:40px; border:none; background:var(--stone-800); color:#fff; font-weight:600;">Increase</button>
+            <button id="freightAdjDec" type="button" style="padding:10px 14px; min-height:40px; border:none; background:#fff; color:var(--stone-500); font-weight:600;">Decrease</button>
           </div>
         </div>
         <div class="row"><div class="field-label">Amount</div><input class="num" id="freightAdjAmount" inputmode="decimal" placeholder="$/FCL" /></div>
