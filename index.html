@@ -181,6 +181,13 @@
           </div>
           <div class="toggle-row">
             <div>
+              <div class="field-label">Include Tarp</div>
+              <div class="field-hint">$15/ST when on · all markets</div>
+            </div>
+            <button class="switch on" id="toggleTarp"><span class="knob"></span></button>
+          </div>
+          <div class="toggle-row">
+            <div>
               <div class="field-label">Packaging</div>
               <div class="field-hint">Single Bale: no press, fixed container weight</div>
             </div>
@@ -192,11 +199,11 @@
         </div>
 
         <div class="formula">
-          (FOB + Freight + Squeeze‑In) × Shrink + Press + Wrap<span class="tag">[Korea]</span> +
+          (FOB + Freight + Squeeze‑In) × Shrink + Press + Tarp + Wrap<span class="tag">[Korea]</span> +
           Fumigation<span class="tag">[Japan]</span> + Drayage + Ocean Freight + Documentation, converted
           ST→MT, + Commission = <b>Total Cost CNF</b>
         </div>
-        <div class="note">Squeeze‑in, shrink, press, wrap, fumigation, drayage, documentation, ocean freight, container weight, and commission are set on the Inputs tab. Use the switches above to price Japan/Korea without fumigation or wrap.</div>
+        <div class="note">Squeeze‑in, shrink, press, tarp, wrap, fumigation, drayage, documentation, ocean freight, container weight, and commission are set on the Inputs tab. Use the switches above to price Japan/Korea without fumigation or wrap.</div>
       </div>
     </div>
 
@@ -260,6 +267,7 @@
           </select>
         </div>
         <div class="row"><div><div class="field-label">Press Charge</div><div class="field-hint">$/ST</div></div><input class="num" id="press" inputmode="decimal" /></div>
+        <div class="row"><div><div class="field-label">Tarp Cost</div><div class="field-hint">$/ST · all markets</div></div><input class="num" id="tarpAmt" inputmode="decimal" /></div>
         <div class="row"><div><div class="field-label">Drayage</div><div class="field-hint">$/FCL</div></div><input class="num" id="drayage" inputmode="decimal" /></div>
         <div class="row"><div><div class="field-label">Documentation</div><div class="field-hint">$/FCL · all markets</div></div><input class="num" id="documentation" inputmode="decimal" /></div>
         <div class="row"><div><div class="field-label">Loading Charge</div><div class="field-hint">$/FCL · Single Bale only</div></div><input class="num" id="loadingCharge" inputmode="decimal" /></div>
@@ -421,6 +429,8 @@ const APP = {
     press: 60,
     wrapAmt: 15,
     wrapEnabled: true,
+    tarpAmt: 15,
+    tarpEnabled: true,
     fumigationAmt: 250,
     fumigationEnabled: true,
     drayage: 875,
@@ -548,6 +558,7 @@ function calc(d) {
     st *= 1 + d.shrinkPct / 100;
     if (!singleBale) st += d.press;
     if (singleBale) st += d.loadingCharge / cw;
+    if (d.tarpEnabled) st += d.tarpAmt;
     if (id === "korea" && d.wrapEnabled && !singleBale) st += d.wrapAmt / ST_TO_MT;
     if (id === "japan" && d.fumigationEnabled) st += d.fumigationAmt / cw;
     st += d.drayage / cw;
@@ -568,6 +579,7 @@ function impliedFob(d, id, targetCnf) {
   let y = z - d.drayage / cw - d.oceanFreight[id] / cw - d.documentation / cw;
   if (!singleBale) y -= d.press;
   if (singleBale) y -= d.loadingCharge / cw;
+  if (d.tarpEnabled) y -= d.tarpAmt;
   if (id === "korea" && d.wrapEnabled && !singleBale) y -= d.wrapAmt / ST_TO_MT;
   if (id === "japan" && d.fumigationEnabled) y -= d.fumigationAmt / cw;
   const x = y / (1 + d.shrinkPct / 100);
@@ -583,6 +595,7 @@ function meCostAtFreight(d, freight) {
   st *= 1 + d.shrinkPct / 100;
   if (!singleBale) st += d.press;
   if (singleBale) st += d.loadingCharge / cw;
+  if (d.tarpEnabled) st += d.tarpAmt;
   st += d.drayage / cw;
   st += freight / cw;
   st += d.documentation / cw;
@@ -1122,6 +1135,7 @@ function wireTopLevel() {
 
   wireInput(document.getElementById("squeezeIn"), { get: () => APP.d.squeezeIn, set: (v) => (APP.d.squeezeIn = v) });
   wireInput(document.getElementById("press"), { get: () => APP.d.press, set: (v) => (APP.d.press = v) });
+  wireInput(document.getElementById("tarpAmt"), { get: () => APP.d.tarpAmt, set: (v) => (APP.d.tarpAmt = v) });
   wireInput(document.getElementById("drayage"), { get: () => APP.d.drayage, set: (v) => (APP.d.drayage = v) });
   wireInput(document.getElementById("documentation"), { get: () => APP.d.documentation, set: (v) => (APP.d.documentation = v) });
   wireInput(document.getElementById("loadingCharge"), { get: () => APP.d.loadingCharge, set: (v) => (APP.d.loadingCharge = v) });
@@ -1148,6 +1162,10 @@ function wireTopLevel() {
   wireSwitch(document.getElementById("toggleWrap"), {
     get: () => APP.d.wrapEnabled,
     set: (v) => (APP.d.wrapEnabled = v),
+  });
+  wireSwitch(document.getElementById("toggleTarp"), {
+    get: () => APP.d.tarpEnabled,
+    set: (v) => (APP.d.tarpEnabled = v),
   });
 
   const pressedBtn = document.getElementById("packingPressed");
