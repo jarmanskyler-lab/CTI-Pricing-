@@ -79,7 +79,7 @@
   .note { font-size:11px; color:var(--stone-400); margin-top:8px; }
   .divide > div + div { border-top:1px solid var(--stone-100); }
   .market-row { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; gap:8px; min-height:44px; }
-  .market-name { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:500; color:var(--stone-700); }
+  .market-name { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:500; color:var(--stone-700); min-width:0; flex-shrink:1; }
   .market-emoji { font-size:14px; }
   .mono { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
   .cost-total { font-size:15px; font-weight:600; color:var(--stone-900); }
@@ -215,6 +215,18 @@
 
     <div class="card">
       <div class="card-head">
+        <h2>Set a Price in One Market → Equivalent Elsewhere</h2>
+        <p>Enter a price in any market — the other two update to match its margin.</p>
+      </div>
+      <div class="row" style="padding:9px 16px; border-bottom:1px solid var(--stone-100);">
+        <span class="field-label">Current margin ($/MT) <span style="font-size:11px; font-weight:400; color:var(--stone-400);">(sets all three)</span></span>
+        <input class="num" id="currentMarginInput" inputmode="decimal" style="width:100px;" />
+      </div>
+      <div class="divide" id="linkedPriceBox"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
         <h2>CNF Price → Implied FOB by Market</h2>
         <p>What FOB you'd need to pay in each market to land at this same CNF price, given each market's own freight, wrap/fumigation, and container costs.</p>
       </div>
@@ -225,18 +237,6 @@
         </div>
       </div>
       <div class="divide" id="impliedFobBox"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-head">
-        <h2>Set a Price in One Market → Equivalent Elsewhere</h2>
-        <p>Enter a price in any market — the other two update to match its margin.</p>
-      </div>
-      <div class="row" style="padding:9px 16px; border-bottom:1px solid var(--stone-100);">
-        <span class="field-label">Current margin ($/MT) <span style="font-size:11px; font-weight:400; color:var(--stone-400);">(sets all three)</span></span>
-        <input class="num" id="currentMarginInput" inputmode="decimal" style="width:100px;" />
-      </div>
-      <div class="divide" id="linkedPriceBox"></div>
     </div>
 
     <div class="card">
@@ -360,6 +360,14 @@
       </div>
       <div id="freightAdjLog" class="divide"></div>
     </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>Price History</h2>
+        <p>Every price you change on this tab is logged automatically — last 60 shown, most recent first.</p>
+      </div>
+      <div id="historyLog" class="divide"></div>
+    </div>
   </div>
 
   <p class="footer-note">Container weights convert lbs → ST (÷2,000) · ST → MT factor: 1.1023</p>
@@ -436,19 +444,19 @@ const APP = {
     drayage: 875,
     documentation: 30,
     containerWeight: { japan: 54500, korea: 51500, middleEast: 52500 },
-    oceanFreight: { japan: 400, korea: 400, middleEast: 6592 },
+    oceanFreight: { japan: 400, korea: 400, middleEast: 7216 },
     commission: { japan: 0, korea: 4, middleEast: 10 },
     packing: "pressed",
     singleBaleBales: 248,
     singleBaleBaleWeight: 107,
     loadingCharge: 500,
     mePorts: {
-      jeddah: 6800,
-      hamad: 7200,
-      kuwait: 6400,
-      bahrain: 6900,
-      otherName: "Other",
-      otherFreight: 6592,
+      jeddah: 8116,
+      hamad: 11216,
+      kuwait: 12016,
+      bahrain: 11386,
+      otherName: "Klang (Evergreen)",
+      otherFreight: 1000,
     },
   },
   salePrices: { japan: 400, korea: 400, middleEast: 650 },
@@ -467,6 +475,7 @@ const APP = {
     otherCommodities: { custom1: "", custom2: "" },
   },
   freightLog: [],
+  changeLog: [],
 };
 
 const DEFAULT_STATE = JSON.parse(JSON.stringify(APP));
@@ -513,6 +522,7 @@ function loadState() {
       });
     }
     if (Array.isArray(p.freightLog)) APP.freightLog = p.freightLog;
+    if (Array.isArray(p.changeLog)) APP.changeLog = p.changeLog;
   } catch (e) {}
 }
 
@@ -526,11 +536,13 @@ function resetToDefaults() {
   APP.customColLabels = fresh.customColLabels;
   APP.customRowLabels = fresh.customRowLabels;
   APP.freightLog = fresh.freightLog;
+  APP.changeLog = fresh.changeLog;
   try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
   allWiredInputs.forEach((el) => el._refresh && el._refresh());
   allWiredSelects.forEach((el) => el._refresh && el._refresh());
   if (window._refreshPackingUI) window._refreshPackingUI();
   renderFreightLog();
+  renderHistoryLog();
   renderAll();
 }
 
@@ -604,6 +616,26 @@ function meCostAtFreight(d, freight) {
   return mt;
 }
 
+function calcCY(d) {
+  const singleBale = d.packing === "singleBale";
+  const out = {};
+  MARKETS.forEach(({ id }) => {
+    const wLbs = containerWeightLbs(d, id);
+    const cw = wLbs > 0 ? wLbs / LBS_PER_ST : 1;
+    let st = d.fob + d.freight;
+    st += d.squeezeIn / cw;
+    st *= 1 + d.shrinkPct / 100;
+    if (!singleBale) st += d.press;
+    if (singleBale) st += d.loadingCharge / cw;
+    if (d.tarpEnabled) st += d.tarpAmt;
+    if (id === "korea" && d.wrapEnabled && !singleBale) st += d.wrapAmt / ST_TO_MT;
+    if (id === "japan" && d.fumigationEnabled) st += d.fumigationAmt / cw;
+    st += d.drayage / cw;
+    out[id] = st * ST_TO_MT;
+  });
+  return out;
+}
+
 /* ---------- generic smart input (allows clearing while typing) ---------- */
 function wireInput(el, opts) {
   // opts: { get: () => number, set: (num) => void, currency: bool, onChangeExtra: () => void }
@@ -667,11 +699,15 @@ function wireSwitch(el, opts) {
 
 function wireTextField(el, opts) {
   let editing = false;
+  let valueOnFocus = "";
   el._refresh = function () {
     if (!editing) el.value = opts.get() || "";
   };
   el._refresh();
-  el.addEventListener("focus", () => { editing = true; });
+  el.addEventListener("focus", () => {
+    editing = true;
+    valueOnFocus = opts.get() || "";
+  });
   el.addEventListener("input", () => {
     opts.set(el.value);
     saveState();
@@ -684,6 +720,10 @@ function wireTextField(el, opts) {
       saveState();
     }
     el._refresh();
+    if (opts.logLabel) {
+      const finalVal = opts.get() || "";
+      if (finalVal !== valueOnFocus) logChange(opts.logLabel, valueOnFocus, finalVal);
+    }
   });
   allWiredInputs.push(el);
 }
@@ -697,15 +737,15 @@ function buildCostSalePriceBox() {
     row.className = "market-row";
     row.innerHTML = `
       <span class="market-name"><span class="market-emoji">${emoji}</span>${label}</span>
-      <span style="display:flex; align-items:center; gap:16px;">
-        <span style="display:flex; flex-direction:column; align-items:flex-end; line-height:1.25;">
-          <span class="mono cost-small" id="cost-${id}">$0.00</span>
-          <span class="mono" id="costDiff-${id}" style="font-size:10px; color:var(--stone-400);"></span>
+      <span style="display:flex; align-items:center; gap:10px;">
+        <span style="display:flex; flex-direction:column; align-items:flex-end; line-height:1.25; width:74px;">
+          <span class="mono cost-small" id="cost-${id}" style="white-space:nowrap; font-size:15px; font-weight:600; color:var(--stone-800);">$0.00</span>
+          <span class="mono" id="cyUnderCost-${id}" style="font-size:9.5px; color:var(--stone-400); white-space:nowrap;"></span>
         </span>
         <span style="display:flex; flex-direction:column; align-items:flex-end; line-height:1.25;">
-          <input class="num" id="salePrice-${id}" inputmode="decimal" style="width:100px;" />
+          <input class="num" id="salePrice-${id}" inputmode="decimal" style="width:88px;" />
         </span>
-        <span class="mono" id="marginDisplay-${id}" style="width:96px; text-align:right; font-size:14px;">$0.00/MT</span>
+        <span class="mono" id="marginDisplay-${id}" style="width:86px; text-align:right; font-size:13.5px;">$0.00/MT</span>
       </span>`;
     box.appendChild(row);
   });
@@ -829,6 +869,16 @@ function buildMarketSpecificBox() {
   });
 }
 
+const CATEGORY_LABELS = { timothy: "Timothy", alfalfa: "Alfalfa", grassStraw: "Grass Straw", otherCommodities: "Other" };
+
+function colDisplayName(category, col) {
+  if (col.editableLabel) return (APP.customColLabels[category] && APP.customColLabels[category][col.id]) || "Other";
+  const m = MARKETS.find((mm) => mm.id === col.id);
+  if (m) return m.label;
+  if (col.id === "china") return "China";
+  return col.id;
+}
+
 function buildPriceListTable(containerId, rows, category, cols, title) {
   cols = cols || MARKETS;
   const table = document.getElementById(containerId);
@@ -894,15 +944,18 @@ function buildPriceListTable(containerId, rows, category, cols, title) {
           wireTextField(el, {
             get: () => APP.priceList[category][row.grade][variant][m.id],
             set: (v) => (APP.priceList[category][row.grade][variant][m.id] = v),
+            logLabel: `${CATEGORY_LABELS[category] || category} · ${row.abbrev} ${variant} · ${colDisplayName(category, m)}`,
           });
         });
       });
     } else {
+      const gradeName = row.editableRowLabel ? (APP.customRowLabels[category][row.grade] || "Custom") : (row.label || row.grade);
       cols.forEach((m) => {
         const el = document.getElementById(`pl-${category}-${gi}-${m.id}`);
         wireTextField(el, {
           get: () => APP.priceList[category][row.grade][m.id],
           set: (v) => (APP.priceList[category][row.grade][m.id] = v),
+          logLabel: `${CATEGORY_LABELS[category] || category} · ${gradeName} · ${colDisplayName(category, m)}`,
         });
       });
     }
@@ -940,6 +993,47 @@ function applyFreightAdjustmentToAllTables(marketId, deltaMt) {
     if (adjustCell(APP.priceList.grassStraw[row.grade], marketId, deltaMt)) touched++;
   });
   return touched;
+}
+
+const CHANGE_LOG_MAX = 300;
+
+function logChange(label, oldVal, newVal) {
+  APP.changeLog.push({
+    ts: Date.now(),
+    label,
+    oldValue: oldVal || "(blank)",
+    newValue: newVal || "(blank)",
+  });
+  if (APP.changeLog.length > CHANGE_LOG_MAX) {
+    APP.changeLog.splice(0, APP.changeLog.length - CHANGE_LOG_MAX);
+  }
+  renderHistoryLog();
+  saveState();
+}
+
+function formatLogDate(ts) {
+  const d = new Date(ts);
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) + " · " + d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+}
+
+function renderHistoryLog() {
+  const box = document.getElementById("historyLog");
+  if (!box) return;
+  if (APP.changeLog.length === 0) {
+    box.innerHTML = `<div style="padding:16px; font-size:12px; color:var(--stone-400);">No price changes logged yet.</div>`;
+    return;
+  }
+  box.innerHTML = APP.changeLog
+    .slice()
+    .reverse()
+    .slice(0, 60)
+    .map(
+      (e) => `<div class="market-row" style="padding:9px 16px; flex-direction:column; align-items:flex-start; gap:2px;">
+        <span style="font-size:11px; color:var(--stone-400);">${formatLogDate(e.ts)} · ${e.label}</span>
+        <span class="mono" style="font-size:12.5px; color:var(--stone-700);">${e.oldValue} → <b>${e.newValue}</b></span>
+      </div>`
+    )
+    .join("");
 }
 
 function renderFreightLog() {
@@ -1085,7 +1179,7 @@ function renderMePortsTable() {
 /* ---------- render / recompute ---------- */
 function renderAll() {
   const r = calc(APP.d);
-  const cheapest = Math.min(...MARKETS.map(({ id }) => r[id].totalCostCNF));
+  const cy = calcCY(APP.d);
 
   MARKETS.forEach(({ id }) => {
     const cost = r[id].totalCostCNF;
@@ -1093,11 +1187,8 @@ function renderAll() {
     const costEl = document.getElementById(`cost-${id}`);
     if (costEl) costEl.textContent = "$" + fmt(cost);
 
-    const diffEl = document.getElementById(`costDiff-${id}`);
-    if (diffEl) {
-      const diff = cost - cheapest;
-      diffEl.textContent = diff > 0.005 ? "+$" + fmt(diff) : "";
-    }
+    const cyUnderEl = document.getElementById(`cyUnderCost-${id}`);
+    if (cyUnderEl) cyUnderEl.textContent = "CY $" + fmt(cy[id]);
 
     const linkedCostEl = document.getElementById(`linkedCost-${id}`);
     if (linkedCostEl) linkedCostEl.textContent = "cost $" + fmt(cost);
@@ -1107,9 +1198,9 @@ function renderAll() {
       const m = APP.salePrices[id] - cost;
       marginEl.textContent = "$" + fmt(m) + "/MT";
       marginEl.className = "mono " + (m >= 0 ? "margin-pos" : "margin-neg");
-      marginEl.style.width = "96px";
+      marginEl.style.width = "86px";
       marginEl.style.textAlign = "right";
-      marginEl.style.fontSize = "14px";
+      marginEl.style.fontSize = "13.5px";
     }
 
     const fobEl = document.getElementById(`impliedFob-${id}`);
@@ -1311,6 +1402,7 @@ function init() {
   wireReset();
   wireLock();
   wireFreightAdjustment();
+  renderHistoryLog();
   renderAll();
 }
 init();
