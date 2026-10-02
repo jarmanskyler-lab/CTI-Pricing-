@@ -2436,16 +2436,17 @@ function wireLock() {
 /* ---------- one-time starting prices (not tied to Reset) ---------- */
 function applyPriceListSeed() {
   const t = APP.priceList.timothy;
-  Object.assign(t["Premium Horse"], { japan: "$745.00", middleEast: "$875.00" });
-  Object.assign(t["#1 Horse"], { japan: "$695.00", middleEast: "$800.00" });
+  Object.assign(t["Premium Horse"], { japan: "$745.00", middleEast: "$900.00" });
+  Object.assign(t["#1 Horse"], { japan: "$695.00" });
   Object.assign(t["Premium Dairy"]["3-Tie"], { japan: "$515.00" });
-  Object.assign(t["Premium Dairy"]["Big Bale"], { japan: "$470.00", korea: "$485.00", middleEast: "$725.00" });
+  Object.assign(t["Premium Dairy"]["Big Bale"], { japan: "$470.00", korea: "$485.00", middleEast: "$825.00" });
   Object.assign(t["Low Premium"]["3-Tie"], { japan: "$440.00" });
-  Object.assign(t["Low Premium"]["Big Bale"], { japan: "$425.00", korea: "$445.00", middleEast: "$700.00" });
+  Object.assign(t["Low Premium"]["Big Bale"], { japan: "$425.00", korea: "$445.00", middleEast: "$725.00" });
   Object.assign(t["GMT"], { korea: "$410.00", middleEast: "$675.00" });
   Object.assign(t["#1 Cattle"]["3-Tie"], { japan: "$385.00" });
-  Object.assign(t["#1 Cattle"]["Big Bale"], { japan: "$390.00", korea: "$395.00" });
+  Object.assign(t["#1 Cattle"]["Big Bale"], { japan: "$390.00", korea: "$395.00", middleEast: "$690.00" });
   Object.assign(t["#1 Cattle"]["Idaho"], { japan: "$380.00" });
+  Object.assign(t["#2 Cattle"]["Big Bale"], { middleEast: "$725.00" });
 
   const a = APP.priceList.alfalfa;
   Object.assign(a["Single Bale"], { japan: "$530.00" });
@@ -2454,8 +2455,25 @@ function applyPriceListSeed() {
   Object.assign(a["Fair"], { japan: "$400.00" });
 }
 
+// Restores the Price History entries Skyler had before clearing Safari's site data wiped
+// his localStorage. Only runs when there's no saved changeLog yet (loadState() below fully
+// replaces APP.changeLog if one was saved), so this never duplicates or overwrites real
+// history once the app is logging fresh changes again.
+function applyChangeLogSeed() {
+  const entries = [
+    { ts: new Date("2026-09-23T10:33:00-07:00").getTime(), label: "Timothy · PD Big Bale · Middle East", oldValue: "$725.00", newValue: "$825.00" },
+    { ts: new Date("2026-09-23T10:33:15-07:00").getTime(), label: "Timothy · LP Big Bale · Middle East", oldValue: "$700.00", newValue: "$725.00" },
+    { ts: new Date("2026-09-23T10:33:30-07:00").getTime(), label: "Timothy · #1 Big Bale · Middle East", oldValue: "(blank)", newValue: "$690.00" },
+    { ts: new Date("2026-09-23T10:34:00-07:00").getTime(), label: "Timothy · #2 Big Bale · Middle East", oldValue: "(blank)", newValue: "$725.00" },
+    { ts: new Date("2026-09-23T10:34:15-07:00").getTime(), label: "Timothy · Premium Horse · Middle East", oldValue: "$875.00", newValue: "$900" },
+    { ts: new Date("2026-09-23T10:34:30-07:00").getTime(), label: "Timothy · #1 Horse · Middle East", oldValue: "$800.00", newValue: "(blank)" },
+  ];
+  APP.changeLog.push(...entries);
+}
+
 function init() {
   applyPriceListSeed();
+  applyChangeLogSeed();
   loadState();
   buildCostSalePriceBox();
   buildImpliedFobBox();
