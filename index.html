@@ -110,8 +110,31 @@
   .price-table tr:last-child td { border-bottom:none; }
   .price-table td.grade-name { text-align:left; font-size:12.5px; color:var(--stone-700); white-space:nowrap; padding-left:12px; }
   .price-table td.grade-name b { font-weight:700; color:var(--stone-900); }
-  .price-table td.grade-name .variant-note { font-size:10.5px; font-weight:400; color:var(--stone-400); }
+  .price-table .variant-note { font-size:10.5px; font-weight:400; color:var(--stone-400); }
   .price-table input.num { width:100%; min-width:60px; padding:5px 6px; }
+  .price-table select.pct { width:100%; min-width:70px; padding:5px 4px; font-size:12px; min-height:34px; }
+  .pw-table th { font-size:11.5px; padding:6px 5px; }
+  .pw-table td { padding:5px 5px; border-left:1px solid rgba(0,0,0,0.05); }
+  .pw-table td:first-child { border-left:none; }
+  .pw-table tbody tr:nth-child(even) { background:var(--stone-50); }
+  .pw-table td.mono { font-size:12.5px; font-weight:500; white-space:nowrap; padding:5px 8px; letter-spacing:0.2px; }
+  .pw-table input.num { min-width:46px; padding:5px 3px; font-size:12px; }
+  .pw-table select.pct { min-width:54px; padding:4px 2px; font-size:11.5px; min-height:32px; }
+  .pw-table input[type="checkbox"] { width:18px; height:18px; }
+  .pw-table input.pw-sell-linked { background:var(--emerald-50); border-color:var(--emerald-600); }
+  #purchaseFieldFormWrap select.pct { text-align:center; }
+  #purchaseFieldFormWrap select.pct option { text-align:center; }
+  .pw-locked-text { display:inline-block; padding:5px 3px; font-size:12.5px; font-weight:500; }
+  .pw-btn-sm {
+    border:1px solid var(--stone-300); border-radius:6px; background:#fff; color:var(--stone-700);
+    font-size:12px; font-weight:600; padding:8px 10px; min-height:36px;
+  }
+  .pw-btn-danger { color:var(--red-600); border-color:var(--red-600); }
+  @media print {
+    .header, .tabs, #lockToggle, .no-print { display:none !important; }
+    body { background:#fff; }
+    .card { box-shadow:none; border:1px solid #ccc; }
+  }
 
   .lock-btn { display:flex; align-items:center; gap:5px; border:1px solid var(--stone-300); border-radius:6px; background:#fff; padding:7px 11px; font-size:12px; font-weight:600; color:var(--stone-600); white-space:nowrap; }
   .lock-btn.locked { background:var(--stone-800); color:#fff; border-color:var(--stone-800); }
@@ -139,6 +162,7 @@
       <button id="tabBtnCalc" class="active">Calculate</button>
       <button id="tabBtnPriceList">Price List</button>
       <button id="tabBtnInputs">Inputs</button>
+      <button id="tabBtnPurchase">Purchase</button>
     </div>
   </div>
 
@@ -175,7 +199,7 @@
           <div class="toggle-row" id="wrapToggleRow">
             <div>
               <div class="field-label">Include Wrap</div>
-              <div class="field-hint" id="wrapToggleHint">Korea · $15/MT when on</div>
+              <div class="field-hint" id="wrapToggleHint">$15/MT when on · all markets</div>
             </div>
             <button class="switch on" id="toggleWrap"><span class="knob"></span></button>
           </div>
@@ -199,11 +223,11 @@
         </div>
 
         <div class="formula">
-          (FOB + Freight + Squeeze‑In) × Shrink + Press + Tarp + Wrap<span class="tag">[Korea]</span> +
+          (FOB + Freight + Squeeze‑In) × Shrink + Press + Tarp + Wrap +
           Fumigation<span class="tag">[Japan]</span> + Drayage + Ocean Freight + Documentation, converted
           ST→MT, + Commission = <b>Total Cost CNF</b>
         </div>
-        <div class="note">Squeeze‑in, shrink, press, tarp, wrap, fumigation, drayage, documentation, ocean freight, container weight, and commission are set on the Inputs tab. Use the switches above to price Japan/Korea without fumigation or wrap.</div>
+        <div class="note">Squeeze‑in, shrink, press, tarp, wrap, fumigation, drayage, documentation, ocean freight, container weight, and commission are set on the Inputs tab. Wrap now applies to whichever market(s) you're pricing when turned on — use the switches above to add or drop it, or fumigation for Japan, as needed.</div>
       </div>
     </div>
 
@@ -268,6 +292,7 @@
         </div>
         <div class="row"><div><div class="field-label">Press Charge</div><div class="field-hint">$/ST</div></div><input class="num" id="press" inputmode="decimal" /></div>
         <div class="row"><div><div class="field-label">Tarp Cost</div><div class="field-hint">$/ST · all markets</div></div><input class="num" id="tarpAmt" inputmode="decimal" /></div>
+        <div class="row"><div><div class="field-label">Wrap Cost</div><div class="field-hint">$/MT · all markets, when on</div></div><input class="num" id="wrapAmt" inputmode="decimal" /></div>
         <div class="row"><div><div class="field-label">Drayage</div><div class="field-hint">$/FCL</div></div><input class="num" id="drayage" inputmode="decimal" /></div>
         <div class="row"><div><div class="field-label">Documentation</div><div class="field-hint">$/FCL · all markets</div></div><input class="num" id="documentation" inputmode="decimal" /></div>
         <div class="row"><div><div class="field-label">Loading Charge</div><div class="field-hint">$/FCL · Single Bale only</div></div><input class="num" id="loadingCharge" inputmode="decimal" /></div>
@@ -280,7 +305,7 @@
     <div class="card">
       <div class="card-head">
         <h2>Market-Specific Inputs</h2>
-        <p>Ocean freight, container weight, and commission for all three · Fumigation is Japan only · Wrap is Korea only</p>
+        <p>Ocean freight, container weight, and commission for all three · Fumigation is Japan only</p>
       </div>
       <div class="market-cols" id="marketSpecificBox"></div>
     </div>
@@ -370,6 +395,78 @@
     </div>
   </div>
 
+  <!-- ===================== PURCHASE WORKSHEET TAB ===================== -->
+  <div id="tabPurchase" class="tabpanel">
+    <div class="card">
+      <div class="card-head">
+        <h2>Worksheet</h2>
+        <p>One worksheet per farm/cutting (e.g. "GB Farms - 2026 Timothy"). Kept as reference and not affected by "Reset all inputs."</p>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="field-label">Worksheet</div>
+          <div style="flex:1; display:flex; gap:6px; align-items:center;">
+            <select id="purchaseWorksheetSelect" class="pct" style="flex:1; width:auto; text-align:left;"></select>
+            <button id="purchaseEditWorksheetMeta" type="button" class="no-print" title="Edit grower / drop year / commodity" style="border:none; background:none; color:var(--stone-500); font-size:15px; padding:4px 6px; flex:0 0 auto;">✎</button>
+          </div>
+        </div>
+        <div class="no-print" style="display:flex; gap:8px; flex-wrap:wrap; padding:6px 0;">
+          <button id="purchaseAddWorksheet" type="button" class="pw-btn-sm">+ New Worksheet</button>
+          <button id="purchaseDeleteWorksheet" type="button" class="pw-btn-sm pw-btn-danger">Delete Worksheet</button>
+          <button id="purchaseLockToggle" type="button" class="pw-btn-sm">🔓 Unlocked</button>
+        </div>
+        <p id="purchaseLockNote" class="footer-note" style="display:none;">Locked — this worksheet's costs are frozen to the rates that were live when you locked it. Unlock to follow live Calculate/Inputs rates again.</p>
+      </div>
+      <div class="card-body no-print" id="purchaseWorksheetFormWrap" style="display:none; border-top:1px solid var(--stone-200);"></div>
+    </div>
+
+    <div id="purchaseEmptyState" class="card" style="display:none;">
+      <div class="card-body" style="text-align:center; color:var(--stone-400); padding:24px 14px; font-size:13px;">
+        No worksheets yet. Tap "+ New Worksheet" above to start.
+      </div>
+    </div>
+
+    <div id="purchaseContent">
+      <div class="card">
+        <div class="card-head">
+          <h2>Fields</h2>
+          <p>Add each field once with its cutting, grade, bale size and count. After that, the only thing you'll usually touch is Market — pick where a field is headed and cost, profit, and totals update live.</p>
+        </div>
+        <div class="card-body" style="overflow-x:auto;">
+          <table class="price-table pw-table" id="purchaseStackTable"></table>
+          <button id="purchaseAddStack" type="button" class="pw-btn-sm no-print" style="margin-top:8px;">+ Add Field</button>
+        </div>
+        <div class="card-body no-print" id="purchaseFieldFormWrap" style="display:none; border-top:1px solid var(--stone-200);"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Projected Pricing</h2>
+          <p>Buy = farm-gate $/ST. Sell follows the Price List tab (green) until you type your own — clear it to re-link.</p>
+        </div>
+        <div class="card-body" style="overflow-x:auto;">
+          <table class="price-table pw-table" id="purchaseGradeTable"></table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Grade Summary</h2></div>
+        <div class="card-body" style="overflow-x:auto;">
+          <table class="price-table" id="purchaseGradeSummaryTable"></table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Whole-Worksheet Totals</h2></div>
+        <div class="card-body" id="purchaseFarmTotals"></div>
+      </div>
+
+      <div class="no-print" style="padding:4px 0 20px;">
+        <button id="purchaseExportPdf" type="button" style="width:100%; background:var(--emerald-700); color:#fff; border:none; border-radius:6px; padding:10px; font-size:13px; font-weight:600;">Export PDF</button>
+      </div>
+    </div>
+  </div>
+
   <p class="footer-note">Container weights convert lbs → ST (÷2,000) · ST → MT factor: 1.1023</p>
   <p class="footer-note"><a href="#" id="resetLink" style="color:var(--stone-400); text-decoration:underline;">Reset all inputs to defaults</a></p>
 </div>
@@ -382,6 +479,16 @@ const MARKETS = [
   { id: "korea", label: "Korea", emoji: "🇰🇷" },
   { id: "middleEast", label: "Middle East", emoji: "🇦🇪" },
 ];
+
+const BALE_SIZES = [
+  { id: "3tie", label: "3-Tie", weight: 105 },
+  { id: "3x4", label: "3x4", weight: 1100 },
+  { id: "4x4", label: "4x4", weight: 1600 },
+];
+function baleSizeWeight(id) {
+  const b = BALE_SIZES.find((x) => x.id === id);
+  return b ? b.weight : 0;
+}
 
 const BALE_VARIANTS = ["3-Tie", "Big Bale", "Idaho"];
 const TIMOTHY_ROWS = [
@@ -476,6 +583,7 @@ const APP = {
   },
   freightLog: [],
   changeLog: [],
+  purchase: { worksheets: [], activeWorksheetId: null },
 };
 
 const DEFAULT_STATE = JSON.parse(JSON.stringify(APP));
@@ -523,6 +631,11 @@ function loadState() {
     }
     if (Array.isArray(p.freightLog)) APP.freightLog = p.freightLog;
     if (Array.isArray(p.changeLog)) APP.changeLog = p.changeLog;
+    if (p.purchase && Array.isArray(p.purchase.worksheets)) {
+      APP.purchase = p.purchase;
+    }
+    // older saved versions used a farm/sheet shape that's no longer compatible — ignored on purpose;
+    // nothing else in saved state is affected.
   } catch (e) {}
 }
 
@@ -571,7 +684,7 @@ function calc(d) {
     if (!singleBale) st += d.press;
     if (singleBale) st += d.loadingCharge / cw;
     if (d.tarpEnabled) st += d.tarpAmt;
-    if (id === "korea" && d.wrapEnabled && !singleBale) st += d.wrapAmt / ST_TO_MT;
+    if (d.wrapEnabled && !singleBale) st += d.wrapAmt / ST_TO_MT;
     if (id === "japan" && d.fumigationEnabled) st += d.fumigationAmt / cw;
     st += d.drayage / cw;
     st += d.oceanFreight[id] / cw;
@@ -592,7 +705,7 @@ function impliedFob(d, id, targetCnf) {
   if (!singleBale) y -= d.press;
   if (singleBale) y -= d.loadingCharge / cw;
   if (d.tarpEnabled) y -= d.tarpAmt;
-  if (id === "korea" && d.wrapEnabled && !singleBale) y -= d.wrapAmt / ST_TO_MT;
+  if (d.wrapEnabled && !singleBale) y -= d.wrapAmt / ST_TO_MT;
   if (id === "japan" && d.fumigationEnabled) y -= d.fumigationAmt / cw;
   const x = y / (1 + d.shrinkPct / 100);
   return x - d.freight - d.squeezeIn / cw;
@@ -608,6 +721,7 @@ function meCostAtFreight(d, freight) {
   if (!singleBale) st += d.press;
   if (singleBale) st += d.loadingCharge / cw;
   if (d.tarpEnabled) st += d.tarpAmt;
+  if (d.wrapEnabled && !singleBale) st += d.wrapAmt / ST_TO_MT;
   st += d.drayage / cw;
   st += freight / cw;
   st += d.documentation / cw;
@@ -628,12 +742,955 @@ function calcCY(d) {
     if (!singleBale) st += d.press;
     if (singleBale) st += d.loadingCharge / cw;
     if (d.tarpEnabled) st += d.tarpAmt;
-    if (id === "korea" && d.wrapEnabled && !singleBale) st += d.wrapAmt / ST_TO_MT;
+    if (d.wrapEnabled && !singleBale) st += d.wrapAmt / ST_TO_MT;
     if (id === "japan" && d.fumigationEnabled) st += d.fumigationAmt / cw;
     st += d.drayage / cw;
     out[id] = st * ST_TO_MT;
   });
   return out;
+}
+
+/* ---------- Purchase Worksheet ---------- */
+function escapeHtml(str) {
+  return String(str == null ? "" : str).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+let _pwIdCounter = 0;
+function pwId() {
+  return "pw" + Date.now().toString(36) + (_pwIdCounter++);
+}
+function pwUniqueName(base, existingNames) {
+  if (!existingNames.includes(base)) return base;
+  let i = 2;
+  while (existingNames.includes(`${base} ${i}`)) i++;
+  return `${base} ${i}`;
+}
+
+/* ---------- fixed grade lists ---------- */
+const TIMOTHY_GRADES_CUT1 = [
+  { key: "PHT", label: "Premium Horse" },
+  { key: "1HT", label: "#1 Horse" },
+  { key: "SPD", label: "Super Premium Dairy" },
+  { key: "PD", label: "Premium Dairy" },
+  { key: "LP", label: "Low Premium Dairy" },
+  { key: "GMT", label: "Grass Mix" },
+  { key: "#1", label: "#1 Cattle" },
+  { key: "#2", label: "#2 Cattle" },
+];
+const TIMOTHY_GRADES_CUT23 = [
+  { key: "PL", label: "Premium Leaf" },
+  { key: "PS", label: "Premium Stem" },
+  { key: "SL", label: "Standard Leaf" },
+  { key: "SS", label: "Standard Stem" },
+  { key: "EL", label: "Economy Leaf" },
+  { key: "ES", label: "Economy Stem" },
+];
+const ALFALFA_GRADES_PW = [
+  { key: "Supreme", label: "Supreme" },
+  { key: "Premium", label: "Premium" },
+  { key: "Good", label: "Good" },
+  { key: "Fair", label: "Fair" },
+  { key: "Utility", label: "Utility" },
+];
+function pwGradeListFor(commodity, cutting) {
+  if (commodity === "alfalfa") return ALFALFA_GRADES_PW;
+  return cutting === 1 ? TIMOTHY_GRADES_CUT1 : TIMOTHY_GRADES_CUT23;
+}
+function pwGradeLabel(commodity, cutting, key) {
+  const g = pwGradeListFor(commodity, cutting).find((x) => x.key === key);
+  return g ? g.label : key;
+}
+function pwAllGradesForCommodity(commodity) {
+  if (commodity === "alfalfa") return ALFALFA_GRADES_PW;
+  return TIMOTHY_GRADES_CUT1.concat(TIMOTHY_GRADES_CUT23);
+}
+function pwGradeLabelAny(commodity, key) {
+  const g = pwAllGradesForCommodity(commodity).find((x) => x.key === key);
+  return g ? g.label : key;
+}
+function pwOrdinal(n) {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+function pwCuttingOptions(commodity) {
+  return commodity === "alfalfa" ? [1, 2, 3, 4] : [1, 2, 3];
+}
+
+// Worksheet display name is built from Grower / Drop Year / Commodity (e.g. "GB Farms —
+// 2026 Timothy") instead of being freely typed, so the Worksheet card stays just a
+// dropdown + an edit button rather than a name field, a commodity toggle, etc.
+function pwComputeWorksheetName(ws) {
+  const commodityLabel = ws.commodity === "alfalfa" ? "Alfalfa" : "Timothy";
+  const grower = (ws.grower || "").trim() || "Untitled";
+  const year = ws.dropYear || new Date().getFullYear();
+  return `${grower} — ${year} ${commodityLabel}`;
+}
+function pwNewWorksheet(grower, dropYear, commodity) {
+  const ws = {
+    id: pwId(),
+    name: "",
+    nameAuto: true,
+    grower: grower || "",
+    dropYear: dropYear || new Date().getFullYear(),
+    commodity: commodity === "alfalfa" ? "alfalfa" : "timothy",
+    inboundFreight: 0,
+    locked: false,
+    lockedD: null,
+    gradePrices: {}, // { [gradeKey]: { buy, sell } } — auto-populated as stacks are graded
+    stacks: [],
+  };
+  ws.name = pwComputeWorksheetName(ws);
+  return ws;
+}
+// Legacy worksheets saved before Grower/Drop Year existed keep their old free-typed
+// name untouched (nameAuto stays false) until the user edits them through the new form.
+function pwNormalizeWorksheet(ws) {
+  if (ws.nameAuto === undefined) ws.nameAuto = false;
+  if (ws.grower === undefined) ws.grower = "";
+  if (ws.dropYear === undefined) ws.dropYear = new Date().getFullYear();
+  if (ws.nameAuto) ws.name = pwComputeWorksheetName(ws);
+  return ws;
+}
+function pwClampStacksToCommodity(ws) {
+  const cuttingOpts = pwCuttingOptions(ws.commodity);
+  ws.stacks.forEach((s) => {
+    if (!cuttingOpts.includes(s.cutting)) s.cutting = 1;
+    const gradeList = pwGradeListFor(ws.commodity, s.cutting);
+    if (s.gradeKey && !gradeList.find((g) => g.key === s.gradeKey)) s.gradeKey = "";
+  });
+}
+
+function pwEnsureState() {
+  if (!APP.purchase || Array.isArray(APP.purchase.farms)) {
+    // migrate from the old farm/sheet shape (or first run) into the flat worksheet shape
+    APP.purchase = { worksheets: [], activeWorksheetId: null };
+  }
+  if (!Array.isArray(APP.purchase.worksheets)) APP.purchase.worksheets = [];
+}
+function pwGetWorksheet(id) {
+  const ws = APP.purchase.worksheets.find((w) => w.id === id);
+  return ws ? pwNormalizeWorksheet(ws) : ws;
+}
+function pwActiveWorksheet() {
+  return pwGetWorksheet(APP.purchase.activeWorksheetId);
+}
+function pwSellField(marketId) {
+  return "sell" + marketId.charAt(0).toUpperCase() + marketId.slice(1);
+}
+// Migrates an old single-"sell" grade entry (pre-per-market-sell) into the new
+// { buy, sellJapan, sellKorea, sellMiddleEast } shape, in place. Safe to call repeatedly.
+function pwNormalizeGradeEntry(gp) {
+  if (!gp) return gp;
+  if (gp.sellJapan === undefined || gp.sellKorea === undefined || gp.sellMiddleEast === undefined) {
+    const legacy = gp.sell || 0;
+    if (gp.sellJapan === undefined) gp.sellJapan = legacy;
+    if (gp.sellKorea === undefined) gp.sellKorea = legacy;
+    if (gp.sellMiddleEast === undefined) gp.sellMiddleEast = legacy;
+  }
+  if (gp.buy === undefined) gp.buy = 0;
+  // sellManual tracks, per market, whether Sell was typed in by hand (true) or should
+  // follow the live Calculate-tab price (false/absent). A pre-existing nonzero value from
+  // before this feature existed is treated as something the user already set on purpose.
+  if (!gp.sellManual) gp.sellManual = {};
+  MARKETS.forEach((m) => {
+    if (gp.sellManual[m.id] === undefined) {
+      const field = pwSellField(m.id);
+      gp.sellManual[m.id] = !!gp[field];
+    }
+  });
+  return gp;
+}
+// The Sell price a grade/market shows and uses: your own typed-in number if you've set
+// one, otherwise the current price from the Price List tab for that grade/market — that's
+// where current prices to each market actually get logged and tracked, not the Calculate
+// tab's single generic Sale Price target. A LOCKED worksheet is frozen: it just shows
+// whatever number is stored, live or not.
+//
+// A handful of Price List grades (Premium Dairy/PD, Low Premium/LP, #1 Cattle/#1, #2
+// Cattle/#2) track three separate prices per market by bale type (3-Tie / Big Bale /
+// Idaho) rather than one. baleSize picks which: "3tie" pulls the 3-Tie price, anything
+// else (3x4, 4x4) pulls Big Bale. Idaho is never auto-picked — it's a source distinction,
+// not a bale size, so it stays something you'd only use as a manual override.
+const PW_GRADE_TO_PRICELIST = {
+  PHT: { category: "timothy", grade: "Premium Horse" },
+  "1HT": { category: "timothy", grade: "#1 Horse" },
+  SPD: { category: "timothy", grade: "Super Premium" },
+  GMT: { category: "timothy", grade: "GMT" },
+  PD: { category: "timothy", grade: "Premium Dairy", variant: true },
+  LP: { category: "timothy", grade: "Low Premium", variant: true },
+  "#1": { category: "timothy", grade: "#1 Cattle", variant: true },
+  "#2": { category: "timothy", grade: "#2 Cattle", variant: true },
+  // Alfalfa "Supreme" has no Price List row (it tracks "Single Bale" instead, a
+  // different grade) so it's deliberately left out here and stays manual-entry.
+  Premium: { category: "alfalfa", grade: "Premium" },
+  Good: { category: "alfalfa", grade: "Good" },
+  Fair: { category: "alfalfa", grade: "Fair" },
+  Utility: { category: "alfalfa", grade: "Utility" },
+  // 2nd/3rd-cutting leaf/stem grades (PL/PS/SL/SS/EL/ES) have no Price List rows at
+  // all yet, so they're left out and stay manual-entry too.
+};
+// Price List cells are free text and can hold a note instead of a number (e.g. "TBD",
+// "+$10") — those can't be used automatically, so this returns null rather than garbage.
+function pwParsePriceListValue(raw) {
+  if (raw === undefined || raw === null) return null;
+  const s = String(raw).trim();
+  if (s === "") return null;
+  const m = s.match(/^\$?(-?\d+(?:\.\d+)?)$/);
+  return m ? parseFloat(m[1]) : null;
+}
+function pwPriceListSellForGrade(gradeKey, marketId, baleSize) {
+  const map = PW_GRADE_TO_PRICELIST[gradeKey];
+  if (!map) return null;
+  const entry = APP.priceList[map.category] && APP.priceList[map.category][map.grade];
+  if (!entry) return null;
+  if (map.variant) {
+    const variant = baleSize === "3tie" ? "3-Tie" : "Big Bale";
+    return entry[variant] ? pwParsePriceListValue(entry[variant][marketId]) : null;
+  }
+  return pwParsePriceListValue(entry[marketId]);
+}
+function pwEffectiveSell(ws, gp, marketId, gradeKey, baleSize) {
+  const field = pwSellField(marketId);
+  if (ws.locked) return gp[field] || 0;
+  if (gp.sellManual && gp.sellManual[marketId]) return gp[field] || 0;
+  const plVal = pwPriceListSellForGrade(gradeKey, marketId, baleSize || "3x4");
+  return plVal !== null ? plVal : 0;
+}
+// Called whenever a Price List price changes, so any grade/market still following it
+// (not manually overridden) updates on the Purchase tab too.
+function pwRefreshLiveSellDependents() {
+  if (!APP.purchase) return;
+  pwEnsureState();
+  const ws = pwActiveWorksheet();
+  if (!ws || !document.getElementById("purchaseStackTable")) return;
+  renderPurchaseGradeTable(ws);
+  renderPurchaseStackTable(ws);
+  renderPurchaseGradeSummary(ws);
+  renderPurchaseFarmTotals(ws);
+}
+function pwEnsureGradeEntry(ws, gradeKey) {
+  if (!gradeKey) return;
+  if (!ws.gradePrices[gradeKey]) ws.gradePrices[gradeKey] = { buy: 0, sellJapan: 0, sellKorea: 0, sellMiddleEast: 0 };
+  pwNormalizeGradeEntry(ws.gradePrices[gradeKey]);
+}
+
+function pwContainerWeightLbs(d, marketId, packing) {
+  if (packing === "singleBale") return (d.singleBaleBales || 0) * (d.singleBaleBaleWeight || 0);
+  return d.containerWeight[marketId];
+}
+
+function pwCostPerMT(d, marketId, packing, buy, inboundFreight) {
+  if (!marketId || !d) return null;
+  const singleBale = packing === "singleBale";
+  const wLbs = pwContainerWeightLbs(d, marketId, packing);
+  const cw = wLbs > 0 ? wLbs / LBS_PER_ST : 1;
+  let st = (buy || 0) + (inboundFreight || 0);
+  st += d.squeezeIn / cw;
+  st *= 1 + d.shrinkPct / 100;
+  if (!singleBale) st += d.press;
+  if (singleBale) st += d.loadingCharge / cw;
+  if (d.tarpEnabled) st += d.tarpAmt;
+  if (d.wrapEnabled && !singleBale) st += d.wrapAmt / ST_TO_MT;
+  if (marketId === "japan" && d.fumigationEnabled) st += d.fumigationAmt / cw;
+  st += d.drayage / cw;
+  st += d.oceanFreight[marketId] / cw;
+  st += d.documentation / cw;
+  let mt = st * ST_TO_MT;
+  mt += d.commission[marketId];
+  return mt;
+}
+
+function pwActiveD(ws) {
+  return ws.locked && ws.lockedD ? ws.lockedD : APP.d;
+}
+
+function pwComputeStack(stack, ws) {
+  const gp = ws.gradePrices[stack.gradeKey] ? pwNormalizeGradeEntry(ws.gradePrices[stack.gradeKey]) : null;
+  const buy = gp ? gp.buy || 0 : 0;
+  const inboundFreight = stack.inboundFreight || 0;
+  const baleWeight = stack.baleWeight || 0;
+  const tonsST = ((stack.bales || 0) * baleWeight) / LBS_PER_ST;
+  const metricTons = tonsST / ST_TO_MT;
+  const buyValue = tonsST * buy;
+  let costPerMT = null,
+    profitPerMT = null,
+    totalProfit = null,
+    sell = null;
+  if (stack.market) {
+    const d = pwActiveD(ws);
+    costPerMT = pwCostPerMT(d, stack.market, stack.packing, buy, inboundFreight);
+    sell = gp ? pwEffectiveSell(ws, gp, stack.market, stack.gradeKey, stack.baleSize) : 0;
+    profitPerMT = sell - costPerMT;
+    totalProfit = profitPerMT * metricTons;
+  }
+  return { tonsST, metricTons, buyValue, costPerMT, profitPerMT, totalProfit, sell };
+}
+
+// Middle East doesn't ship single-bale Timothy — no matter what grade is assigned, a
+// Timothy field sold to Middle East is always pressed. Call this any time a stack's
+// market, grade, or packing changes so the rule can't be bypassed from any entry point.
+function pwEnforcePacking(stack, ws) {
+  if (ws.commodity === "timothy" && stack.market === "middleEast") {
+    stack.packing = "pressed";
+    return true;
+  }
+  return false;
+}
+
+function pwSelectWorksheet(id) {
+  APP.purchase.activeWorksheetId = id;
+  pwFieldForm = { open: false, editId: null };
+  pwWorksheetForm = { open: false, editId: null };
+  renderPurchaseTab();
+  saveState();
+}
+
+function pwStackRowComputed(stack, ws) {
+  // No FOB here — FOB is a per-market, per-grade reference figure (see the Grade Pricing
+  // table), not tied to any one field's own packing, so showing it again per-field just
+  // duplicated that number without adding anything. Cost/MT and Profit/MT below DO use
+  // this field's actual packing and market.
+  const c = pwComputeStack(stack, ws);
+  return {
+    tons: fmt(c.tonsST, 2),
+    cost: c.costPerMT === null ? "—" : "$" + fmt(c.costPerMT),
+    profitPerMT: c.profitPerMT === null ? "—" : "$" + fmt(c.profitPerMT),
+    totalProfit: c.totalProfit === null ? "—" : "$" + fmt(c.totalProfit, 0),
+  };
+}
+
+// Transient UI state for the Add/Edit Field form — not persisted, resets on reload.
+// Once a field is created, Market is the only thing meant to change often, so creating
+// and editing a field both go through this form instead of a row full of selects.
+let pwFieldForm = { open: false, editId: null };
+
+const MARKET_ABBREV = { japan: "JP", korea: "KR", middleEast: "ME" };
+
+function renderPurchaseStackTable(ws) {
+  const table = document.getElementById("purchaseStackTable");
+  const locked = ws.locked;
+  let html = `<thead><tr>
+    <th style="text-align:left;">Field</th><th>Grade</th><th>Bales</th><th>Tons</th>
+    <th>Market</th><th>Cost/MT</th><th>Profit/MT</th><th>Total Profit</th><th></th>
+  </tr></thead><tbody>`;
+  ws.stacks.forEach((s) => {
+    const c = pwStackRowComputed(s, ws);
+    const baleLabel = (BALE_SIZES.find((b) => b.id === s.baleSize) || {}).label || s.baleSize;
+    const subNote = `${pwOrdinal(s.cutting)} · ${baleLabel}`;
+    const fieldLabel = s.field ? escapeHtml(s.field) : '<span style="color:var(--stone-400);">Untitled field</span>';
+    const gradeList = pwGradeListFor(ws.commodity, s.cutting);
+    html += `<tr data-stack-id="${s.id}">
+      <td class="grade-name">${fieldLabel}<br /><span class="variant-note">${subNote}</span></td>
+      <td>${
+        locked
+          ? `<span class="mono pw-locked-text">${s.gradeKey || "—"}</span>`
+          : `<select class="pct pw-stack-grade" data-id="${s.id}">
+        <option value="" ${!s.gradeKey ? "selected" : ""}>—</option>
+        ${gradeList.map((g) => `<option value="${g.key}" title="${escapeHtml(g.label)}" ${g.key === s.gradeKey ? "selected" : ""}>${g.key}</option>`).join("")}
+      </select>`
+      }</td>
+      <td class="mono">${fmt(s.bales || 0, 0)}</td>
+      <td class="mono pw-cell-tons" data-id="${s.id}">${c.tons}</td>
+      <td>${
+        locked
+          ? `<span class="mono pw-locked-text">${s.market ? MARKET_ABBREV[s.market] : "—"}</span>`
+          : `<select class="pct pw-stack-market" data-id="${s.id}">
+        <option value="" ${!s.market ? "selected" : ""}>—</option>
+        <option value="japan" title="Japan" ${s.market === "japan" ? "selected" : ""}>JP</option>
+        <option value="korea" title="Korea" ${s.market === "korea" ? "selected" : ""}>KR</option>
+        <option value="middleEast" title="Middle East" ${s.market === "middleEast" ? "selected" : ""}>ME</option>
+      </select>`
+      }</td>
+      <td class="mono pw-cell-cost" data-id="${s.id}">${c.cost}</td>
+      <td class="mono pw-cell-profitmt" data-id="${s.id}">${c.profitPerMT}</td>
+      <td class="mono pw-cell-totalprofit" data-id="${s.id}">${c.totalProfit}</td>
+      <td class="no-print" style="white-space:nowrap;">${
+        locked
+          ? ""
+          : `<button type="button" class="pw-edit-stack" data-id="${s.id}" style="border:none;background:none;color:var(--stone-500);font-size:14px;padding:2px 4px;">✎</button><button type="button" class="pw-del-stack" data-id="${s.id}" style="border:none;background:none;color:var(--red-600);font-size:16px;padding:2px 4px;">✕</button>`
+      }</td>
+    </tr>`;
+  });
+  if (ws.stacks.length === 0) html += `<tr><td colspan="9" style="text-align:center; color:var(--stone-400); padding:10px;">No fields yet — tap "+ Add Field" below.</td></tr>`;
+  html += `</tbody>`;
+  table.innerHTML = html;
+
+  function updateRow(id) {
+    const stack = ws.stacks.find((x) => x.id === id);
+    if (!stack) return;
+    const c = pwStackRowComputed(stack, ws);
+    const tonsEl = table.querySelector(`.pw-cell-tons[data-id="${id}"]`);
+    const costEl = table.querySelector(`.pw-cell-cost[data-id="${id}"]`);
+    const pmtEl = table.querySelector(`.pw-cell-profitmt[data-id="${id}"]`);
+    const tpEl = table.querySelector(`.pw-cell-totalprofit[data-id="${id}"]`);
+    if (tonsEl) tonsEl.textContent = c.tons;
+    if (costEl) costEl.textContent = c.cost;
+    if (pmtEl) pmtEl.textContent = c.profitPerMT;
+    if (tpEl) tpEl.textContent = c.totalProfit;
+    renderPurchaseGradeSummary(ws);
+    renderPurchaseFarmTotals(ws);
+    saveState();
+  }
+
+  table.querySelectorAll(".pw-stack-market").forEach((el) =>
+    el.addEventListener("change", () => {
+      const s = ws.stacks.find((x) => x.id === el.dataset.id);
+      if (s) {
+        s.market = el.value;
+        pwEnforcePacking(s, ws);
+        updateRow(el.dataset.id);
+      }
+    })
+  );
+  table.querySelectorAll(".pw-stack-grade").forEach((el) =>
+    el.addEventListener("change", () => {
+      const s = ws.stacks.find((x) => x.id === el.dataset.id);
+      if (!s) return;
+      s.gradeKey = el.value;
+      // Horse grades are almost always single-bale — default to it on the row too,
+      // same as the Add/Edit Field form, without overriding a deliberate choice elsewhere.
+      if (s.gradeKey === "PHT" || s.gradeKey === "1HT") s.packing = "singleBale";
+      pwEnforcePacking(s, ws);
+      pwEnsureGradeEntry(ws, s.gradeKey);
+      renderPurchaseGradeTable(ws);
+      renderPurchaseStackTable(ws);
+      renderPurchaseGradeSummary(ws);
+      renderPurchaseFarmTotals(ws);
+      saveState();
+    })
+  );
+  table.querySelectorAll(".pw-edit-stack").forEach((el) =>
+    el.addEventListener("click", () => {
+      pwFieldForm = { open: true, editId: el.dataset.id };
+      renderPurchaseFieldForm(ws);
+    })
+  );
+  table.querySelectorAll(".pw-del-stack").forEach((el) =>
+    el.addEventListener("click", () => {
+      ws.stacks = ws.stacks.filter((x) => x.id !== el.dataset.id);
+      if (pwFieldForm.editId === el.dataset.id) pwFieldForm = { open: false, editId: null };
+      renderPurchaseStackTable(ws);
+      renderPurchaseFieldForm(ws);
+      renderPurchaseGradeTable(ws);
+      renderPurchaseGradeSummary(ws);
+      renderPurchaseFarmTotals(ws);
+      saveState();
+    })
+  );
+}
+
+// Builds the Add/Edit Field form inline under the Fields table. Market is deliberately
+// NOT part of this form — it's set per-row in the table and expected to change often,
+// while everything here (grade, bale size, count, cutting) is normally set once.
+function renderPurchaseFieldForm(ws) {
+  const wrap = document.getElementById("purchaseFieldFormWrap");
+  const addBtn = document.getElementById("purchaseAddStack");
+  if (ws.locked) pwFieldForm = { open: false, editId: null };
+  if (!pwFieldForm.open) {
+    wrap.style.display = "none";
+    wrap.innerHTML = "";
+    if (addBtn) addBtn.style.display = ws.locked ? "none" : "";
+    return;
+  }
+  if (addBtn) addBtn.style.display = "none";
+  const editing = !!pwFieldForm.editId;
+  const stack = editing ? ws.stacks.find((x) => x.id === pwFieldForm.editId) : null;
+  if (editing && !stack) {
+    pwFieldForm = { open: false, editId: null };
+    return renderPurchaseFieldForm(ws);
+  }
+  const vals = stack || { field: "", cutting: 1, gradeKey: "", baleSize: "3x4", bales: 0, packing: "pressed", market: "", inboundFreight: ws.inboundFreight || 0 };
+  const cuttingOpts = pwCuttingOptions(ws.commodity);
+  const gradeList = pwGradeListFor(ws.commodity, vals.cutting);
+  // Middle East doesn't ship single-bale Timothy — if this field's market is already set
+  // to Middle East (set inline in the table, after it's been added once), lock the
+  // checkbox off here no matter what grade is picked.
+  const forcePressed = ws.commodity === "timothy" && vals.market === "middleEast";
+
+  wrap.style.display = "block";
+  wrap.innerHTML = `
+    <h3 style="font-size:13px; font-weight:700; color:var(--stone-700); margin:0 0 8px;">${editing ? "Edit Field" : "Add Field"}</h3>
+    <div class="row"><div class="field-label">Field Name</div><input type="text" id="pwFieldName" class="num" style="flex:1; width:auto; text-align:left;" placeholder="e.g. North 40" value="${escapeHtml(vals.field)}" /></div>
+    <div class="row"><div class="field-label">Bales</div><input class="num" id="pwFieldBales" inputmode="decimal" value="${vals.bales || ""}" /></div>
+    <div class="row"><div class="field-label">Cutting</div><select id="pwFieldCutting" class="pct" style="width:88px;">${cuttingOpts.map((n) => `<option value="${n}" ${n === vals.cutting ? "selected" : ""}>${pwOrdinal(n)}</option>`).join("")}</select></div>
+    <div class="row"><div class="field-label">Grade</div><select id="pwFieldGrade" class="pct" style="width:88px;" title="${vals.gradeKey ? escapeHtml(pwGradeLabelAny(ws.commodity, vals.gradeKey)) : ""}"><option value="">—</option>${gradeList.map((g) => `<option value="${g.key}" title="${escapeHtml(g.label)}" ${g.key === vals.gradeKey ? "selected" : ""}>${g.key}</option>`).join("")}</select></div>
+    <div class="row"><div class="field-label">Bale Size</div><select id="pwFieldBaleSize" class="pct" style="width:88px;">${BALE_SIZES.map((b) => `<option value="${b.id}" ${b.id === vals.baleSize ? "selected" : ""}>${b.label}</option>`).join("")}</select></div>
+    <div class="row"><div class="field-label">Inbound Freight <span class="field-hint">$/ST</span></div><input class="num" id="pwFieldInboundFreight" inputmode="decimal" value="${vals.inboundFreight || ""}" /></div>
+    <div class="toggle-row"><div class="field-label">Single Bale</div><input type="checkbox" id="pwFieldSingleBale" ${vals.packing === "singleBale" && !forcePressed ? "checked" : ""} ${forcePressed ? "disabled" : ""} /></div>
+    ${forcePressed ? `<p class="footer-note" style="color:var(--stone-400); margin:-4px 0 6px;">Middle East ships Timothy pressed only.</p>` : ""}
+    <div style="display:flex; gap:8px; padding-top:10px;">
+      <button type="button" id="pwFieldSave" class="pw-btn-sm" style="background:var(--emerald-700); color:#fff; border-color:var(--emerald-700); flex:1;">${editing ? "Update Field" : "Add Field"}</button>
+      <button type="button" id="pwFieldCancel" class="pw-btn-sm" style="flex:1;">Cancel</button>
+    </div>
+  `;
+
+  const nameInput = document.getElementById("pwFieldName");
+  const cuttingSel = document.getElementById("pwFieldCutting");
+  const gradeSel = document.getElementById("pwFieldGrade");
+  const singleBaleCb = document.getElementById("pwFieldSingleBale");
+
+  cuttingSel.addEventListener("change", () => {
+    const cutting = parseInt(cuttingSel.value, 10) || 1;
+    const newGradeList = pwGradeListFor(ws.commodity, cutting);
+    const keepKey = newGradeList.find((g) => g.key === gradeSel.value) ? gradeSel.value : "";
+    gradeSel.innerHTML = `<option value="">—</option>` + newGradeList.map((g) => `<option value="${g.key}" title="${escapeHtml(g.label)}" ${g.key === keepKey ? "selected" : ""}>${g.key}</option>`).join("");
+  });
+  gradeSel.addEventListener("change", () => {
+    gradeSel.title = gradeSel.value ? pwGradeLabelAny(ws.commodity, gradeSel.value) : "";
+    // Horse grades are almost always single-bale, not pressed — default to it so it's
+    // rarely something you have to remember to flip yourself. Middle East Timothy
+    // overrides this — it never ships single bale.
+    if ((gradeSel.value === "PHT" || gradeSel.value === "1HT") && !forcePressed) singleBaleCb.checked = true;
+  });
+
+  document.getElementById("pwFieldSave").addEventListener("click", () => {
+    const cutting = parseInt(cuttingSel.value, 10) || 1;
+    const baleSize = document.getElementById("pwFieldBaleSize").value;
+    const target = editing ? stack : pwNewStack();
+    target.field = nameInput.value;
+    target.cutting = cutting;
+    target.gradeKey = gradeSel.value;
+    target.baleSize = baleSize;
+    target.baleWeight = baleSizeWeight(baleSize);
+    target.bales = parseFloat(document.getElementById("pwFieldBales").value) || 0;
+    target.inboundFreight = parseFloat(document.getElementById("pwFieldInboundFreight").value) || 0;
+    target.packing = singleBaleCb.checked ? "singleBale" : "pressed";
+    pwEnforcePacking(target, ws);
+    if (!editing) {
+      ws.stacks.push(target);
+      // Remember this as the default Inbound Freight for the next new field on this
+      // worksheet — editing an existing field's freight doesn't change that default.
+      ws.inboundFreight = target.inboundFreight;
+    }
+    pwEnsureGradeEntry(ws, target.gradeKey);
+    pwFieldForm = { open: false, editId: null };
+    renderPurchaseStackTable(ws);
+    renderPurchaseFieldForm(ws);
+    renderPurchaseGradeTable(ws);
+    renderPurchaseGradeSummary(ws);
+    renderPurchaseFarmTotals(ws);
+    saveState();
+  });
+
+  document.getElementById("pwFieldCancel").addEventListener("click", () => {
+    pwFieldForm = { open: false, editId: null };
+    renderPurchaseFieldForm(ws);
+  });
+
+  nameInput.focus();
+}
+
+function renderPurchaseGradeTable(ws) {
+  const table = document.getElementById("purchaseGradeTable");
+  const locked = ws.locked;
+  const usedKeys = Array.from(new Set(ws.stacks.map((s) => s.gradeKey).filter(Boolean)));
+  // show every gradeKey that's ever been used OR already has saved pricing, ordered to match the fixed list
+  const gradeList = pwAllGradesForCommodity(ws.commodity);
+  const keysToShow = gradeList.map((g) => g.key).filter((k) => {
+    if (usedKeys.includes(k)) return true;
+    const gp = ws.gradePrices[k];
+    if (!gp) return false;
+    pwNormalizeGradeEntry(gp);
+    return gp.buy || gp.sellJapan || gp.sellKorea || gp.sellMiddleEast;
+  });
+
+  let html = `<thead><tr>
+    <th style="text-align:left;">Grade</th><th>Buy $/ST</th>
+    ${MARKETS.map((m) => `<th>Sell ${m.label}</th>`).join("")}
+    <th></th>
+  </tr></thead><tbody>`;
+  keysToShow.forEach((key) => {
+    if (!ws.gradePrices[key]) ws.gradePrices[key] = { buy: 0, sellJapan: 0, sellKorea: 0, sellMiddleEast: 0 };
+    const gp = pwNormalizeGradeEntry(ws.gradePrices[key]);
+    const label = pwGradeLabelAny(ws.commodity, key);
+    const inUse = usedKeys.includes(key);
+    html += `<tr data-grade-key="${key}">
+      <td class="grade-name"><b>${key}</b><br /><span class="variant-note">${escapeHtml(label)}</span></td>
+      <td>${
+        locked
+          ? `<span class="mono pw-locked-text">${gp.buy ? "$" + fmt(gp.buy) : "—"}</span>`
+          : `<input class="num pw-grade-buy" data-key="${key}" inputmode="decimal" value="${gp.buy ? "$" + fmt(gp.buy) : ""}">`
+      }</td>
+      ${MARKETS.map((m) => {
+        const isManual = !!(gp.sellManual && gp.sellManual[m.id]);
+        const hasSource = PW_GRADE_TO_PRICELIST[key] && pwPriceListSellForGrade(key, m.id, "3x4") !== null;
+        const isLinked = !locked && !isManual && hasSource;
+        const sellVal = pwEffectiveSell(ws, gp, m.id, key, "3x4");
+        const title = isLinked ? `Following today's ${m.label} price for this grade from the Price List tab — type a number to set your own` : !hasSource && !isManual ? "No Price List entry for this grade/market yet — type a number" : "";
+        if (locked) return `<td><span class="mono pw-locked-text">${sellVal ? "$" + fmt(sellVal) : "—"}</span></td>`;
+        return `<td><input class="num pw-grade-sell${isLinked ? " pw-sell-linked" : ""}" data-key="${key}" data-market="${m.id}" inputmode="decimal" value="${sellVal ? "$" + fmt(sellVal) : ""}" title="${title}"></td>`;
+      }).join("")}
+      <td class="no-print">${!locked && !inUse ? `<button type="button" class="pw-del-grade" data-key="${key}" style="border:none;background:none;color:var(--red-600);font-size:16px;">✕</button>` : ""}</td>
+    </tr>`;
+  });
+  if (keysToShow.length === 0) html += `<tr><td colspan="${2 + MARKETS.length}" style="text-align:center; color:var(--stone-400); padding:10px;">Grade pricing shows up here once you grade a field below</td></tr>`;
+  html += `</tbody>`;
+  table.innerHTML = html;
+
+  table.querySelectorAll(".pw-grade-buy").forEach((el) => {
+    el.addEventListener("focus", () => {
+      const gp = ws.gradePrices[el.dataset.key];
+      el.value = gp && gp.buy ? String(gp.buy) : "";
+      el.select && el.select();
+    });
+    el.addEventListener("input", () => {
+      const gp = ws.gradePrices[el.dataset.key];
+      if (!gp) return;
+      gp.buy = parseFloat(el.value) || 0;
+      renderPurchaseStackTable(ws);
+      renderPurchaseGradeSummary(ws);
+      renderPurchaseFarmTotals(ws);
+      saveState();
+    });
+    el.addEventListener("blur", () => {
+      const gp = ws.gradePrices[el.dataset.key];
+      el.value = gp && gp.buy ? "$" + fmt(gp.buy) : "";
+    });
+  });
+  table.querySelectorAll(".pw-grade-sell").forEach((el) => {
+    el.addEventListener("focus", () => {
+      const gp = ws.gradePrices[el.dataset.key];
+      if (!gp) return;
+      const val = pwEffectiveSell(ws, gp, el.dataset.market, el.dataset.key, "3x4");
+      el.value = val ? String(val) : "";
+      el.select && el.select();
+    });
+    el.addEventListener("blur", () => {
+      const gp = ws.gradePrices[el.dataset.key];
+      if (!gp) return;
+      const val = pwEffectiveSell(ws, gp, el.dataset.market, el.dataset.key, "3x4");
+      el.value = val ? "$" + fmt(val) : "";
+    });
+    el.addEventListener("input", () => {
+      const gp = ws.gradePrices[el.dataset.key];
+      if (!gp) return;
+      const marketId = el.dataset.market;
+      const field = pwSellField(marketId);
+      if (el.value.trim() === "") {
+        // Cleared back to blank = go back to following the Price List price, if this
+        // grade/market has one.
+        gp[field] = 0;
+        gp.sellManual[marketId] = false;
+        // Reflect the live value right away without re-rendering the whole table
+        // (a full re-render here would steal focus mid-keystroke).
+        const hasSource = PW_GRADE_TO_PRICELIST[el.dataset.key] && pwPriceListSellForGrade(el.dataset.key, marketId, "3x4") !== null;
+        const live = pwEffectiveSell(ws, gp, marketId, el.dataset.key, "3x4");
+        el.value = live || "";
+        if (hasSource) {
+          el.classList.add("pw-sell-linked");
+          el.title = `Following today's ${MARKETS.find((m) => m.id === marketId).label} price for this grade from the Price List tab — type a number to set your own`;
+        } else {
+          el.classList.remove("pw-sell-linked");
+          el.title = "No Price List entry for this grade/market yet — type a number";
+        }
+      } else {
+        gp[field] = parseFloat(el.value) || 0;
+        gp.sellManual[marketId] = true;
+        el.classList.remove("pw-sell-linked");
+        el.title = "";
+      }
+      renderPurchaseStackTable(ws);
+      renderPurchaseGradeSummary(ws);
+      renderPurchaseFarmTotals(ws);
+      saveState();
+    });
+  });
+  table.querySelectorAll(".pw-del-grade").forEach((el) =>
+    el.addEventListener("click", () => {
+      delete ws.gradePrices[el.dataset.key];
+      renderPurchaseGradeTable(ws);
+      saveState();
+    })
+  );
+}
+
+function renderPurchaseGradeSummary(ws) {
+  const table = document.getElementById("purchaseGradeSummaryTable");
+  const gradeList = pwAllGradesForCommodity(ws.commodity);
+  const usedKeys = Array.from(new Set(ws.stacks.map((s) => s.gradeKey).filter(Boolean)));
+  const rows = gradeList
+    .filter((g) => usedKeys.includes(g.key))
+    .map((g) => {
+      const stacksForGrade = ws.stacks.filter((s) => s.gradeKey === g.key);
+      let bales = 0,
+        tonsST = 0,
+        tonsSTPriced = 0,
+        totalProfit = 0,
+        anyMarket = false,
+        containersPressed = 0,
+        containersSingle = 0;
+      const d = pwActiveD(ws);
+      stacksForGrade.forEach((s) => {
+        const c = pwComputeStack(s, ws);
+        bales += s.bales || 0;
+        tonsST += c.tonsST;
+        if (c.totalProfit !== null) {
+          totalProfit += c.totalProfit;
+          tonsSTPriced += c.tonsST;
+          anyMarket = true;
+        }
+        if (s.market) {
+          const wLbs = pwContainerWeightLbs(d, s.market, s.packing);
+          if (wLbs > 0) {
+            const containers = c.tonsST / (wLbs / LBS_PER_ST);
+            if (s.packing === "singleBale") containersSingle += containers;
+            else containersPressed += containers;
+          }
+        }
+      });
+      const metricTonsPriced = tonsSTPriced / ST_TO_MT;
+      const marginPerMT = anyMarket && metricTonsPriced > 0 ? totalProfit / metricTonsPriced : null;
+      const containersTotal = containersPressed + containersSingle;
+      const packNote = containersPressed > 0 && containersSingle > 0 ? "Mixed" : containersSingle > 0 ? "Single" : containersPressed > 0 ? "DC" : "";
+      return { key: g.key, bales, tonsST, totalProfit: anyMarket ? totalProfit : null, marginPerMT, containersTotal, packNote };
+    });
+
+  let html = `<thead><tr><th style="text-align:left;">Grade</th><th>Bales</th><th>Tons (ST)</th><th>Margin/MT</th><th>Total Profit</th><th>FCL</th></tr></thead><tbody>`;
+  rows.forEach((r) => {
+    const marginClass = r.marginPerMT === null ? "" : r.marginPerMT >= 0 ? "margin-pos" : "margin-neg";
+    const profitClass = r.totalProfit === null ? "" : r.totalProfit >= 0 ? "margin-pos" : "margin-neg";
+    html += `<tr><td class="grade-name"><b>${r.key}</b></td><td class="mono">${fmt(r.bales, 0)}</td><td class="mono">${fmt(r.tonsST, 2)}</td><td class="mono ${marginClass}">${r.marginPerMT === null ? "—" : "$" + fmt(r.marginPerMT)}</td><td class="mono ${profitClass}">${r.totalProfit === null ? "—" : "$" + fmt(r.totalProfit, 0)}</td><td class="mono">${fmt(r.containersTotal, 1)}${r.packNote ? `<br/><span class="variant-note">${r.packNote}</span>` : ""}</td></tr>`;
+  });
+  if (rows.length === 0) html += `<tr><td colspan="6" style="text-align:center; color:var(--stone-400); padding:10px;">No fields yet</td></tr>`;
+  html += `</tbody>`;
+  table.innerHTML = html;
+}
+
+function renderPurchaseFarmTotals(ws) {
+  const box = document.getElementById("purchaseFarmTotals");
+  let bales = 0,
+    tonsST = 0,
+    totalProfit = 0,
+    totalContainers = 0,
+    anyMarket = false,
+    allAssigned = ws.stacks.length > 0;
+  const d = pwActiveD(ws);
+  ws.stacks.forEach((s) => {
+    const c = pwComputeStack(s, ws);
+    bales += s.bales || 0;
+    tonsST += c.tonsST;
+    if (c.totalProfit !== null) {
+      totalProfit += c.totalProfit;
+      anyMarket = true;
+    }
+    if (!s.market) allAssigned = false;
+    if (s.market) {
+      const wLbs = pwContainerWeightLbs(d, s.market, s.packing);
+      if (wLbs > 0) totalContainers += c.tonsST / (wLbs / LBS_PER_ST);
+    }
+  });
+  const metricTons = tonsST / ST_TO_MT;
+  const profitPerTon = anyMarket && metricTons > 0 ? totalProfit / metricTons : null;
+  box.innerHTML = `
+    <div class="row"><div class="field-label">Total Bales</div><div class="mono">${fmt(bales, 0)}</div></div>
+    <div class="row"><div class="field-label">Total Tons (MT)</div><div class="mono">${fmt(metricTons, 2)}</div></div>
+    <div class="row"><div class="field-label">Total FCL</div><div class="mono">${fmt(totalContainers, 1)}</div></div>
+    <div class="row"><div class="field-label">Total Profit</div><div class="mono ${totalProfit >= 0 ? "margin-pos" : "margin-neg"}">${anyMarket ? "$" + fmt(totalProfit, 0) : "—"}</div></div>
+    <div class="row"><div class="field-label">Profit / MT (avg)</div><div class="mono ${profitPerTon !== null && profitPerTon >= 0 ? "margin-pos" : "margin-neg"}">${profitPerTon === null ? "—" : "$" + fmt(profitPerTon)}</div></div>
+    ${allAssigned ? "" : `<p class="footer-note" style="color:var(--stone-400); margin-top:6px;">Totals only include stacks with a market assigned — some stacks here still need one.</p>`}
+  `;
+}
+
+// Transient UI state for the Add/Edit Worksheet form (Grower / Drop Year / Commodity) —
+// not persisted, resets on reload, same pattern as pwFieldForm.
+let pwWorksheetForm = { open: false, editId: null };
+
+function renderPurchaseWorksheetForm(ws) {
+  const wrap = document.getElementById("purchaseWorksheetFormWrap");
+  if (!pwWorksheetForm.open) {
+    wrap.style.display = "none";
+    wrap.innerHTML = "";
+    return;
+  }
+  const editing = !!pwWorksheetForm.editId;
+  const target = editing ? pwGetWorksheet(pwWorksheetForm.editId) : null;
+  if (editing && !target) {
+    pwWorksheetForm = { open: false, editId: null };
+    return renderPurchaseWorksheetForm(ws);
+  }
+  const vals = target || { grower: "", dropYear: new Date().getFullYear(), commodity: "timothy" };
+
+  wrap.style.display = "block";
+  wrap.innerHTML = `
+    <h3 style="font-size:13px; font-weight:700; color:var(--stone-700); margin:0 0 8px;">${editing ? "Edit Worksheet" : "New Worksheet"}</h3>
+    <div class="row"><div class="field-label">Grower</div><input type="text" id="pwWsGrower" class="num" style="flex:1; width:auto; text-align:left;" placeholder="e.g. GB Farms" value="${escapeHtml(vals.grower)}" /></div>
+    <div class="row"><div class="field-label">Crop Year</div><input class="num" id="pwWsDropYear" inputmode="numeric" style="width:88px;" value="${vals.dropYear}" /></div>
+    <div class="toggle-row">
+      <div class="field-label">Commodity</div>
+      <div style="display:flex; border:1px solid var(--stone-300); border-radius:6px; overflow:hidden; font-size:12px;">
+        <button id="pwWsCommodityTimothy" type="button" style="padding:8px 14px; min-height:36px; border:none; font-weight:600; background:${vals.commodity === "alfalfa" ? "#fff" : "var(--stone-800)"}; color:${vals.commodity === "alfalfa" ? "var(--stone-500)" : "#fff"};">Timothy</button>
+        <button id="pwWsCommodityAlfalfa" type="button" style="padding:8px 14px; min-height:36px; border:none; font-weight:600; background:${vals.commodity === "alfalfa" ? "var(--stone-800)" : "#fff"}; color:${vals.commodity === "alfalfa" ? "#fff" : "var(--stone-500)"};">Alfalfa</button>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px; padding-top:10px;">
+      <button type="button" id="pwWsSave" class="pw-btn-sm" style="background:var(--emerald-700); color:#fff; border-color:var(--emerald-700); flex:1;">${editing ? "Update Worksheet" : "Create Worksheet"}</button>
+      <button type="button" id="pwWsCancel" class="pw-btn-sm" style="flex:1;">Cancel</button>
+    </div>
+  `;
+
+  let commodityChoice = vals.commodity === "alfalfa" ? "alfalfa" : "timothy";
+  function paintCommodityButtons() {
+    const tBtn = document.getElementById("pwWsCommodityTimothy");
+    const aBtn = document.getElementById("pwWsCommodityAlfalfa");
+    const isAlfalfa = commodityChoice === "alfalfa";
+    tBtn.style.background = isAlfalfa ? "#fff" : "var(--stone-800)";
+    tBtn.style.color = isAlfalfa ? "var(--stone-500)" : "#fff";
+    aBtn.style.background = isAlfalfa ? "var(--stone-800)" : "#fff";
+    aBtn.style.color = isAlfalfa ? "#fff" : "var(--stone-500)";
+  }
+  document.getElementById("pwWsCommodityTimothy").addEventListener("click", () => {
+    commodityChoice = "timothy";
+    paintCommodityButtons();
+  });
+  document.getElementById("pwWsCommodityAlfalfa").addEventListener("click", () => {
+    commodityChoice = "alfalfa";
+    paintCommodityButtons();
+  });
+
+  document.getElementById("pwWsSave").addEventListener("click", () => {
+    const grower = document.getElementById("pwWsGrower").value;
+    const dropYear = parseInt(document.getElementById("pwWsDropYear").value, 10) || new Date().getFullYear();
+    if (editing) {
+      const commodityChanged = target.commodity !== commodityChoice;
+      if (commodityChanged && target.stacks.length > 0) {
+        if (!confirm(`Switch this worksheet to ${commodityChoice === "alfalfa" ? "Alfalfa" : "Timothy"}? Any fields graded for the other commodity's grades will need a new grade assigned.`)) {
+          commodityChoice = target.commodity; // keep the original if they back out
+        }
+      }
+      target.grower = grower;
+      target.dropYear = dropYear;
+      target.commodity = commodityChoice;
+      target.nameAuto = true;
+      target.name = pwComputeWorksheetName(target);
+      pwClampStacksToCommodity(target);
+    } else {
+      const newWs = pwNewWorksheet(grower, dropYear, commodityChoice);
+      APP.purchase.worksheets.push(newWs);
+      APP.purchase.activeWorksheetId = newWs.id;
+    }
+    pwWorksheetForm = { open: false, editId: null };
+    pwFieldForm = { open: false, editId: null };
+    renderPurchaseTab();
+    saveState();
+  });
+
+  document.getElementById("pwWsCancel").addEventListener("click", () => {
+    pwWorksheetForm = { open: false, editId: null };
+    renderPurchaseWorksheetForm(ws);
+  });
+}
+
+function renderPurchaseTab() {
+  pwEnsureState();
+  const worksheets = APP.purchase.worksheets;
+  const wsSelect = document.getElementById("purchaseWorksheetSelect");
+  const emptyState = document.getElementById("purchaseEmptyState");
+  const content = document.getElementById("purchaseContent");
+
+  if (worksheets.length === 0) {
+    emptyState.style.display = "block";
+    content.style.display = "none";
+    wsSelect.innerHTML = "";
+    return;
+  }
+  emptyState.style.display = "none";
+  content.style.display = "block";
+
+  worksheets.forEach(pwNormalizeWorksheet);
+  if (!pwGetWorksheet(APP.purchase.activeWorksheetId)) APP.purchase.activeWorksheetId = worksheets[0].id;
+  const ws = pwActiveWorksheet();
+
+  wsSelect.innerHTML = worksheets.map((w) => `<option value="${w.id}" ${w.id === ws.id ? "selected" : ""}>${escapeHtml(w.name)}</option>`).join("");
+
+  const lockBtn = document.getElementById("purchaseLockToggle");
+  const lockNote = document.getElementById("purchaseLockNote");
+  lockBtn.textContent = ws.locked ? "🔒 Locked" : "🔓 Unlocked";
+  lockNote.style.display = ws.locked ? "block" : "none";
+
+  const editMetaBtn = document.getElementById("purchaseEditWorksheetMeta");
+  editMetaBtn.style.display = ws.locked ? "none" : "";
+
+  if (ws.locked) pwWorksheetForm = { open: false, editId: null };
+  renderPurchaseWorksheetForm(ws);
+  renderPurchaseStackTable(ws);
+  renderPurchaseFieldForm(ws);
+  renderPurchaseGradeTable(ws);
+  renderPurchaseGradeSummary(ws);
+  renderPurchaseFarmTotals(ws);
+}
+
+function wirePurchaseTab() {
+  pwEnsureState();
+  document.getElementById("purchaseWorksheetSelect").addEventListener("change", (e) => pwSelectWorksheet(e.target.value));
+
+  document.getElementById("purchaseAddWorksheet").addEventListener("click", () => {
+    pwFieldForm = { open: false, editId: null };
+    pwWorksheetForm = { open: true, editId: null };
+    renderPurchaseWorksheetForm(pwActiveWorksheet());
+  });
+
+  document.getElementById("purchaseEditWorksheetMeta").addEventListener("click", () => {
+    const ws = pwActiveWorksheet();
+    if (!ws) return;
+    pwFieldForm = { open: false, editId: null };
+    pwWorksheetForm = { open: true, editId: ws.id };
+    renderPurchaseWorksheetForm(ws);
+  });
+
+  document.getElementById("purchaseDeleteWorksheet").addEventListener("click", () => {
+    const ws = pwActiveWorksheet();
+    if (!ws) return;
+    if (!confirm(`Delete worksheet "${ws.name}"? This can't be undone.`)) return;
+    APP.purchase.worksheets = APP.purchase.worksheets.filter((w) => w.id !== ws.id);
+    const next = APP.purchase.worksheets[0];
+    APP.purchase.activeWorksheetId = next ? next.id : null;
+    pwFieldForm = { open: false, editId: null };
+    pwWorksheetForm = { open: false, editId: null };
+    renderPurchaseTab();
+    saveState();
+  });
+
+  document.getElementById("purchaseLockToggle").addEventListener("click", () => {
+    const ws = pwActiveWorksheet();
+    if (!ws) return;
+    if (!ws.locked) {
+      // Freeze cost rates AND any grade/market Sell price that was still following the
+      // Price List tab — otherwise a locked worksheet's margin would still drift later
+      // whenever that price list gets updated, defeating the point of locking.
+      Object.keys(ws.gradePrices).forEach((key) => {
+        const gp = pwNormalizeGradeEntry(ws.gradePrices[key]);
+        MARKETS.forEach((m) => {
+          if (!gp.sellManual[m.id]) {
+            const plVal = pwPriceListSellForGrade(key, m.id, "3x4");
+            gp[pwSellField(m.id)] = plVal !== null ? plVal : 0;
+          }
+        });
+      });
+      ws.locked = true;
+      ws.lockedD = JSON.parse(JSON.stringify(APP.d));
+    } else {
+      ws.locked = false;
+      ws.lockedD = null;
+    }
+    renderPurchaseTab();
+    saveState();
+  });
+
+  document.getElementById("purchaseAddStack").addEventListener("click", () => {
+    const ws = pwActiveWorksheet();
+    if (!ws) return;
+    pwFieldForm = { open: true, editId: null };
+    renderPurchaseFieldForm(ws);
+  });
+
+  document.getElementById("purchaseExportPdf").addEventListener("click", () => {
+    window.print();
+  });
+}
+
+function pwNewStack() {
+  return { id: pwId(), field: "", cutting: 1, gradeKey: "", baleSize: "3x4", baleWeight: baleSizeWeight("3x4"), bales: 0, market: "", packing: "pressed", inboundFreight: 0 };
 }
 
 /* ---------- generic smart input (allows clearing while typing) ---------- */
@@ -711,6 +1768,7 @@ function wireTextField(el, opts) {
   el.addEventListener("input", () => {
     opts.set(el.value);
     saveState();
+    pwRefreshLiveSellDependents();
   });
   el.addEventListener("blur", () => {
     editing = false;
@@ -718,6 +1776,7 @@ function wireTextField(el, opts) {
     if (/^-?\d+(\.\d+)?$/.test(raw)) {
       opts.set("$" + fmt(parseFloat(raw)));
       saveState();
+      pwRefreshLiveSellDependents();
     }
     el._refresh();
     if (opts.logLabel) {
@@ -826,9 +1885,6 @@ function buildMarketSpecificBox() {
     let extraRow = "";
     if (id === "japan") {
       extraRow = `<div class="subrow"><span>Fumigation</span><input class="num" id="fumigationAmt" inputmode="decimal" style="width:76px;" /></div>`;
-    }
-    if (id === "korea") {
-      extraRow = `<div class="subrow"><span>Wrap</span><input class="num" id="wrapAmt" inputmode="decimal" style="width:76px;" /></div>`;
     }
     col.innerHTML = `
       <div class="market-col-head"><span class="market-emoji">${emoji}</span>${label}</div>
@@ -1131,7 +2187,7 @@ function buildMePortsTable() {
       <span class="market-name"><span ${labelId ? `id="${labelId}"` : ""}>${label || ""}</span>${base ? '<span class="tag-pill">base</span>' : ""}</span>
       <span style="display:flex; align-items:center; gap:12px;">
         <span class="mono cost-total" id="mePortCost-${key}">$0.00</span>
-        <span class="mono" id="mePortDiff-${key}" style="width:70px; text-align:right; font-size:13px; color:var(--stone-500);">—</span>
+        <span class="mono" id="mePortDiff-${key}" style="width:50px; text-align:right; font-size:11.5px; color:var(--stone-500);">—</span>
         <span class="mono cost-total" id="mePortPrice-${key}" style="width:80px; text-align:right;">$0.00</span>
       </span>`;
     box.appendChild(row);
@@ -1139,7 +2195,7 @@ function buildMePortsTable() {
   const colLabels = document.createElement("div");
   colLabels.className = "colgroup-labels";
   colLabels.style.gap = "12px";
-  colLabels.innerHTML = `<span>cost cnf</span><span style="width:70px;">vs jebel ali</span><span style="width:80px;">sale price</span>`;
+  colLabels.innerHTML = `<span>cost cnf</span><span style="width:50px; font-size:9px;">vs jebel ali</span><span style="width:80px;">sale price</span>`;
   box.appendChild(colLabels);
 }
 
@@ -1225,6 +2281,7 @@ function renderAll() {
   if (marginInputEl && marginInputEl._refresh) marginInputEl._refresh();
 
   renderMePortsTable();
+  pwRefreshLiveSellDependents();
 
   saveState();
 }
@@ -1299,7 +2356,7 @@ function wireTopLevel() {
     summaryRow.style.display = isSingle ? "flex" : "none";
     wrapRow.style.opacity = isSingle ? ".4" : "1";
     wrapRow.style.pointerEvents = isSingle ? "none" : "auto";
-    wrapHint.textContent = isSingle ? "Not used for Single Bale" : "Korea · $15/MT when on";
+    wrapHint.textContent = isSingle ? "Not used for Single Bale" : "$15/MT when on · all markets";
 
     if (isSingle) {
       const totalLbs = (APP.d.singleBaleBales || 0) * (APP.d.singleBaleBaleWeight || 0);
@@ -1329,6 +2386,7 @@ function wireTabs() {
     { btn: "tabBtnCalc", panel: "tabCalc", subtitle: "FOB through CNF, three markets" },
     { btn: "tabBtnPriceList", panel: "tabPriceList", subtitle: "Reference price list by grade and market" },
     { btn: "tabBtnInputs", panel: "tabInputs", subtitle: "Shared and market-specific costs" },
+    { btn: "tabBtnPurchase", panel: "tabPurchase", subtitle: "Whole-farm purchase worksheets" },
   ];
   const subtitle = document.getElementById("tabSubtitle");
   const lockBtn = document.getElementById("lockToggle");
@@ -1413,7 +2471,9 @@ function init() {
   wireReset();
   wireLock();
   wireFreightAdjustment();
+  wirePurchaseTab();
   renderHistoryLog();
+  renderPurchaseTab();
   renderAll();
 }
 init();
