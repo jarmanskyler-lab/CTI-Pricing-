@@ -437,11 +437,11 @@ const APP = {
     press: 60,
     wrapAmt: 15,
     wrapEnabled: true,
-    tarpAmt: 15,
+    tarpAmt: 12,
     tarpEnabled: true,
     fumigationAmt: 250,
     fumigationEnabled: true,
-    drayage: 875,
+    drayage: 925,
     documentation: 30,
     containerWeight: { japan: 54500, korea: 51500, middleEast: 52500 },
     oceanFreight: { japan: 400, korea: 400, middleEast: 7216 },
@@ -452,11 +452,11 @@ const APP = {
     loadingCharge: 500,
     mePorts: {
       jeddah: 8116,
-      hamad: 11216,
+      hamad: 11458,
       kuwait: 12016,
       bahrain: 11386,
-      otherName: "Klang (Evergreen)",
-      otherFreight: 1000,
+      otherName: "Nhava Sheva",
+      otherFreight: 3666,
     },
   },
   salePrices: { japan: 400, korea: 400, middleEast: 650 },
@@ -1129,16 +1129,17 @@ function buildMePortsTable() {
     row.className = "market-row";
     row.innerHTML = `
       <span class="market-name"><span ${labelId ? `id="${labelId}"` : ""}>${label || ""}</span>${base ? '<span class="tag-pill">base</span>' : ""}</span>
-      <span style="display:flex; align-items:center; gap:16px;">
+      <span style="display:flex; align-items:center; gap:12px;">
         <span class="mono cost-total" id="mePortCost-${key}">$0.00</span>
-        <span class="mono" id="mePortDiff-${key}" style="width:80px; text-align:right; font-size:13px; color:var(--stone-500);">—</span>
+        <span class="mono" id="mePortDiff-${key}" style="width:70px; text-align:right; font-size:13px; color:var(--stone-500);">—</span>
+        <span class="mono cost-total" id="mePortPrice-${key}" style="width:80px; text-align:right;">$0.00</span>
       </span>`;
     box.appendChild(row);
   });
   const colLabels = document.createElement("div");
   colLabels.className = "colgroup-labels";
-  colLabels.style.gap = "16px";
-  colLabels.innerHTML = `<span>cost cnf</span><span style="width:80px;">vs jebel ali</span>`;
+  colLabels.style.gap = "12px";
+  colLabels.innerHTML = `<span>cost cnf</span><span style="width:70px;">vs jebel ali</span><span style="width:80px;">sale price</span>`;
   box.appendChild(colLabels);
 }
 
@@ -1158,20 +1159,30 @@ function renderMePortsTable() {
   const otherLabelEl = document.getElementById("mePortRowLabel-other");
   if (otherLabelEl) otherLabelEl.textContent = APP.d.mePorts.otherName || "Other";
 
+  const margin = APP.salePrices.middleEast - jebelCost;
+
   ports.forEach(({ key, cost }) => {
     const costEl = document.getElementById(`mePortCost-${key}`);
     if (costEl) costEl.textContent = "$" + fmt(cost);
 
     const diffEl = document.getElementById(`mePortDiff-${key}`);
-    if (!diffEl) return;
-    if (key === "jebel") {
-      diffEl.textContent = "—";
-      diffEl.style.color = "var(--stone-400)";
-    } else {
-      const diff = cost - jebelCost;
-      const sign = diff >= 0 ? "+" : "−";
-      diffEl.textContent = sign + "$" + fmt(Math.abs(diff));
-      diffEl.style.color = diff > 0 ? "var(--red-600)" : diff < 0 ? "var(--emerald-700)" : "var(--stone-400)";
+    if (diffEl) {
+      if (key === "jebel") {
+        diffEl.textContent = "—";
+        diffEl.style.color = "var(--stone-400)";
+      } else {
+        const diff = cost - jebelCost;
+        const sign = diff >= 0 ? "+" : "−";
+        diffEl.textContent = sign + "$" + fmt(Math.abs(diff));
+        diffEl.style.color = diff > 0 ? "var(--red-600)" : diff < 0 ? "var(--emerald-700)" : "var(--stone-400)";
+      }
+    }
+
+    const priceEl = document.getElementById(`mePortPrice-${key}`);
+    if (priceEl) {
+      const price = cost + margin;
+      priceEl.textContent = "$" + fmt(price);
+      priceEl.className = "mono cost-total " + (margin >= 0 ? "margin-pos" : "margin-neg");
     }
   });
 }
